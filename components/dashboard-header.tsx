@@ -18,14 +18,14 @@ export function DashboardHeader({ setSidebarOpen, toggleSidebarCollapsed, isSide
     <header className="bg-background border-b border-border lg:border-l-0">
       <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
         <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* <Button variant="ghost" size="sm" className="lg:hidden p-2" onClick={() => setSidebarOpen(true)}>
+          <Button variant="ghost" size="sm" className="lg:hidden p-2" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button> */}
-          {/* {toggleSidebarCollapsed && (
+          </Button>
+          {toggleSidebarCollapsed && (
             <Button variant="ghost" size="sm" className="hidden lg:inline-flex p-2" onClick={toggleSidebarCollapsed}>
               {isSidebarCollapsed ? <PanelLeftOpen className="h-4 w-4 sm:h-5 sm:w-5" /> : <PanelLeftClose className="h-4 w-4 sm:h-5 sm:w-5" />}
             </Button>
-          )} */}
+          )}
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Cari transaksi..." className="pl-10 w-48 sm:w-64" />
@@ -38,10 +38,10 @@ export function DashboardHeader({ setSidebarOpen, toggleSidebarCollapsed, isSide
               <Home className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
-          {/* <Button variant="ghost" size="sm" className="relative p-2">
+          <Button variant="ghost" size="sm" className="relative p-2">
             <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs" />
-          </Button> */}
+          </Button>
           <Button variant="ghost" size="sm" className="p-2" onClick={logout}>
             <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>

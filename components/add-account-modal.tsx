@@ -46,6 +46,15 @@ export function AddAccountModal({
   description = "Tambahkan rekening baru ke daftar Anda"
 }: AddAccountModalProps) {
   const [open, setOpen] = useState(false)
+  
+  // Auto-open modal when editingAccount is set
+  useEffect(() => {
+    if (editingAccount) {
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }, [editingAccount])
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
@@ -65,7 +74,7 @@ export function AddAccountModal({
       setFormData({
         name: editingAccount.name,
         type: editingAccount.type,
-        balance: String(editingAccount.balance ?? 0),
+        balance: editingAccount.balance ? formatIDR(editingAccount.balance) : "",
         accountNumber: editingAccount.accountNumber || "",
         description: editingAccount.description || "",
       })
@@ -79,6 +88,22 @@ export function AddAccountModal({
       })
     }
   }, [editingAccount])
+  
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!open) {
+      // Modal is closed, reset form if not editing
+      if (!editingAccount) {
+        setFormData({
+          name: "",
+          type: "",
+          balance: "",
+          accountNumber: "",
+          description: "",
+        })
+      }
+    }
+  }, [open, editingAccount])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,6 +126,17 @@ export function AddAccountModal({
       })
       return
     }
+    
+    // Validate balance if provided
+    const balanceAmount = parseIDR(formData.balance)
+    if (formData.balance && balanceAmount < 0) {
+      toast({ 
+        title: "Saldo tidak valid", 
+        description: "Saldo awal tidak boleh negatif",
+        variant: "destructive"
+      })
+      return
+    }
 
     setLoading(true)
     try {
@@ -110,7 +146,7 @@ export function AddAccountModal({
         await updateAccount(editingAccount.id, {
           name: formData.name.trim(),
           type: formData.type as any,
-          balance: parseIDR(formData.balance),
+          balance: formData.balance ? parseIDR(formData.balance) : 0,
           accountNumber: formData.accountNumber.trim(),
           description: formData.description.trim(),
         })
@@ -118,20 +154,14 @@ export function AddAccountModal({
         await addAccount({
           name: formData.name.trim(),
           type: formData.type as any,
-          balance: parseIDR(formData.balance),
+          balance: formData.balance ? parseIDR(formData.balance) : 0,
           accountNumber: formData.accountNumber.trim(),
           description: formData.description.trim(),
         })
       }
       
-      // Reset form and close modal
-      setFormData({ name: "", type: "", balance: "", accountNumber: "", description: "" })
-      setOpen(false)
-      
-      // Call callback if provided
-      if (onAccountUpdated) {
-        onAccountUpdated()
-      }
+      // Use handleSuccess for consistent behavior
+      handleSuccess()
     } catch (err: any) {
       console.error("Error saving account:", err)
       toast({ 
@@ -167,6 +197,30 @@ export function AddAccountModal({
     setOpen(false)
     // Reset form when closing
     setFormData({ name: "", type: "", balance: "", accountNumber: "", description: "" })
+    // Clear editing state when closing
+    if (editingAccount && onAccountUpdated) {
+      onAccountUpdated()
+    }
+  }
+  
+  // Handle successful submission
+  const handleSuccess = () => {
+    setOpen(false)
+    setFormData({ name: "", type: "", balance: "", accountNumber: "", description: "" })
+    if (onAccountUpdated) {
+      onAccountUpdated()
+    }
+  }
+  
+  // Reset form data to initial state
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      type: "",
+      balance: "",
+      accountNumber: "",
+      description: "",
+    })
   }
 
   const isEditing = !!editingAccount
@@ -175,7 +229,14 @@ export function AddAccountModal({
   const submitButtonText = loading ? "Menyimpan..." : (isEditing ? "Perbarui" : "Tambah") + " Rekening"
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        // Modal is closing, reset state
+        handleClose()
+      } else {
+        setOpen(true)
+      }
+    }}>
       <DialogTrigger asChild>
         {trigger || (
           <Button size="sm" className="bg-primary hover:bg-primary/90">
@@ -184,7 +245,7 @@ export function AddAccountModal({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border z-[9999]">
         <DialogHeader>
           <DialogTitle className="text-card-foreground">{modalTitle}</DialogTitle>
           <DialogDescription>{modalDescription}</DialogDescription>
@@ -238,7 +299,8 @@ export function AddAccountModal({
                 placeholder="Rp 0" 
                 value={formData.balance} 
                 onChange={(e) => handleBalanceChange(e.target.value)} 
-                className="bg-background border-border" 
+                className="bg-background border-border"
+                required={false}
               />
             </div>
             <div className="space-y-2">

@@ -16,7 +16,12 @@ export const metadata: Metadata = {
     icon: "/icon-192x192.png",
     apple: "/icon-192x192.png",
   },
-  viewport: "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
+  viewport: {
+    minimumScale: 1,
+    initialScale: 1,
+    width: "device-width",
+    viewportFit: "cover",
+  },
   themeColor: "#3b82f6",
 }
 

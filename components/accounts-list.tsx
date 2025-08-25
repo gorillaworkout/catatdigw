@@ -44,29 +44,29 @@ export function AccountsList() {
   if (loading) {
     return (
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
-              <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
+              <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" disabled>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 disabled:opacity-50 w-full sm:w-auto" disabled>
               <Plus className="h-4 w-4 mr-2" />
               Tambah
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <div className="flex items-center space-x-3">
-                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg flex-shrink-0" />
                 <div>
-                  <Skeleton className="h-4 w-24 mb-2" />
-                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-4 w-20 sm:w-24 mb-2" />
+                  <Skeleton className="h-3 w-16 sm:w-16" />
                 </div>
               </div>
-              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-16 sm:w-20" />
             </div>
           ))}
         </CardContent>
@@ -77,16 +77,16 @@ export function AccountsList() {
   if (error) {
     return (
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
-              <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
+              <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
             <AddAccountModal onAccountUpdated={handleAccountUpdated} />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <p className="text-sm text-red-500">Gagal memuat data rekening: {error}</p>
         </CardContent>
       </Card>
@@ -96,16 +96,16 @@ export function AccountsList() {
   if (accounts.length === 0) {
     return (
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
-              <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
+              <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
             <AddAccountModal onAccountUpdated={handleAccountUpdated} />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <p className="text-sm text-muted-foreground text-center py-8">
             Belum ada rekening. Tambahkan rekening pertama Anda untuk memulai.
           </p>
@@ -116,31 +116,31 @@ export function AccountsList() {
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader>
-        <div className="flex items-center justify-between">
+      <CardHeader className="px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
-            <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
+            <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
           </div>
           <AddAccountModal onAccountUpdated={handleAccountUpdated} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
         {accounts.map((account) => {
           const { icon: Icon, color } = getAccountIcon(account.type)
           return (
             <div key={account.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <div className="flex items-center space-x-3">
-                <div className="bg-background p-2 rounded-lg">
-                  <Icon className={`h-5 w-5 ${color}`} />
+                <div className="bg-background p-2 rounded-lg flex-shrink-0">
+                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${color}`} />
                 </div>
-                <div>
-                  <p className="font-medium text-card-foreground">{account.name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{account.type}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-card-foreground text-sm sm:text-base truncate">{account.name}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground capitalize truncate">{account.type}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-card-foreground">{formatCurrency(account.balance || 0)}</p>
+              <div className="text-right flex-shrink-0 ml-2">
+                <p className="font-semibold text-card-foreground text-sm sm:text-base">{formatCurrency(account.balance || 0)}</p>
               </div>
             </div>
           )

@@ -46,8 +46,8 @@ export function IncomesList() {
   if (loading) {
     return (
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="h-6 w-32 bg-muted animate-pulse rounded" />
             <div className="h-4 w-20 bg-muted animate-pulse rounded" />
           </div>
@@ -55,11 +55,11 @@ export function IncomesList() {
         <CardContent className="p-0">
           <div className="divide-y divide-border">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="p-4">
+              <div key={index} className="p-3 sm:p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
+                      <div className="h-8 w-8 bg-muted animate-pulse rounded-lg flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="h-4 w-32 bg-muted animate-pulse rounded mb-2" />
                         <div className="h-3 w-24 bg-muted animate-pulse rounded" />
@@ -79,8 +79,8 @@ export function IncomesList() {
   if (incomes.length === 0) {
     return (
       <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-card-foreground">Daftar Pendapatan</CardTitle>
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Pendapatan</CardTitle>
         </CardHeader>
         <CardContent className="p-8 text-center">
           <div className="text-muted-foreground">
@@ -95,47 +95,49 @@ export function IncomesList() {
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-card-foreground">Daftar Pendapatan</CardTitle>
+      <CardHeader className="px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Pendapatan</CardTitle>
           <div className="text-sm text-muted-foreground">{incomes.length} transaksi</div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-border">
           {paginatedIncomes.map((income) => (
-            <div key={income.id} className="p-4 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center justify-between">
+            <div key={income.id} className="p-3 sm:p-4 hover:bg-muted/50 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="bg-green-500/10 p-2 rounded-lg">
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="bg-green-500/10 p-2 rounded-lg flex-shrink-0">
                       <TrendingUp className="h-4 w-4 text-green-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-card-foreground truncate">{income.description}</h3>
-                      <div className="flex items-center gap-2 mt-1">
+                      <h3 className="font-medium text-card-foreground truncate text-sm sm:text-base">{income.description}</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
                         <Badge
                           variant="outline"
-                          className={categoryColors[income.categoryName || 'Lainnya'] || categoryColors["Lainnya"]}
+                          className={`text-xs ${categoryColors[income.categoryName || 'Lainnya'] || categoryColors["Lainnya"]}`}
                         >
                           {income.categoryName || 'Lainnya'}
                         </Badge>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{income.accountName || 'Tidak diketahui'}</span>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{formatDate(income.date)}</span>
+                        <span className="hidden sm:inline text-sm text-muted-foreground">•</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{income.accountName || 'Tidak diketahui'}</span>
+                        <span className="hidden sm:inline text-sm text-muted-foreground">•</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(income.date)}</span>
                       </div>
-                      {income.notes && <p className="text-sm text-muted-foreground mt-1 truncate">{income.notes}</p>}
+                      {income.notes && (
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{income.notes}</p>
+                      )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-end gap-3">
                   <div className="text-right">
-                    <div className="text-lg font-semibold text-green-500">+{formatCurrency(income.amount)}</div>
+                    <div className="text-base sm:text-lg font-semibold text-green-500">+{formatCurrency(income.amount)}</div>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -158,17 +160,17 @@ export function IncomesList() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-border">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-t border-border gap-3">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
               Halaman {currentPage} dari {totalPages}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center sm:justify-end">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="bg-background border-border"
+                className="bg-background border-border text-xs sm:text-sm px-3 py-1 h-8 sm:h-9"
               >
                 Sebelumnya
               </Button>
@@ -177,7 +179,7 @@ export function IncomesList() {
                 size="sm"
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="bg-background border-border"
+                className="bg-background border-border text-xs sm:text-sm px-3 py-1 h-8 sm:h-9"
               >
                 Selanjutnya
               </Button>

@@ -123,47 +123,49 @@ export function ExpensesList() {
   return (
     <>
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-card-foreground">Daftar Pengeluaran</CardTitle>
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Pengeluaran</CardTitle>
             <div className="text-sm text-muted-foreground">{loading ? "Memuat..." : `${expenses.length} transaksi`}</div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-border">
             {paginatedExpenses.map((expense) => (
-              <div key={expense.id} className="p-4 hover:bg-muted/50 transition-colors">
-                <div className="flex items-center justify-between">
+              <div key={expense.id} className="p-3 sm:p-4 hover:bg-muted/50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="bg-red-500/10 p-2 rounded-lg">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="bg-red-500/10 p-2 rounded-lg flex-shrink-0">
                         <Receipt className="h-4 w-4 text-red-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-card-foreground truncate">{expense.description}</h3>
-                        <div className="flex items-center gap-2 mt-1">
+                        <h3 className="font-medium text-card-foreground truncate text-sm sm:text-base">{expense.description}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
                           <Badge
                             variant="outline"
-                            className={categoryColors[expense.categoryName || "Lainnya"] || categoryColors["Lainnya"]}
+                            className={`text-xs ${categoryColors[expense.categoryName || "Lainnya"] || categoryColors["Lainnya"]}`}
                           >
                             {expense.categoryName || "Lainnya"}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">•</span>
-                          <span className="text-sm text-muted-foreground">{expense.accountName || expense.accountId}</span>
-                          <span className="text-sm text-muted-foreground">•</span>
-                          <span className="text-sm text-muted-foreground">{formatDate(expense.date)}</span>
+                          <span className="hidden sm:inline text-sm text-muted-foreground">•</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{expense.accountName || expense.accountId}</span>
+                          <span className="hidden sm:inline text-sm text-muted-foreground">•</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(expense.date)}</span>
                         </div>
-                        {expense.notes && <p className="text-sm text-muted-foreground mt-1 truncate">{expense.notes}</p>}
+                        {expense.notes && (
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{expense.notes}</p>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between sm:justify-end gap-3">
                     <div className="text-right">
-                      <div className="text-lg font-semibold text-red-500">-{formatCurrency(expense.amount)}</div>
+                      <div className="text-base sm:text-lg font-semibold text-red-500">-{formatCurrency(expense.amount)}</div>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -192,17 +194,17 @@ export function ExpensesList() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-border">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-t border-border gap-3">
+              <div className="text-sm text-muted-foreground text-center sm:text-left">
                 Halaman {currentPage} dari {totalPages}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center sm:justify-end">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="bg-background border-border"
+                  className="bg-background border-border text-xs sm:text-sm px-3 py-1 h-8 sm:h-9"
                 >
                   Sebelumnya
                 </Button>
@@ -211,7 +213,7 @@ export function ExpensesList() {
                   size="sm"
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="bg-background border-border"
+                  className="bg-background border-border text-xs sm:text-sm px-3 py-1 h-8 sm:h-9"
                 >
                   Selanjutnya
                 </Button>
@@ -232,7 +234,7 @@ export function ExpensesList() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-card border-border">
+        <AlertDialogContent className="bg-card border-border max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-card-foreground">Hapus Pengeluaran</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
@@ -244,14 +246,14 @@ export function ExpensesList() {
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="bg-background border-border">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel disabled={deleting} className="bg-background border-border w-full sm:w-auto">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction 
+              disabled={deleting} 
               onClick={handleDeleteConfirm}
-              disabled={deleting}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
             >
               {deleting ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>

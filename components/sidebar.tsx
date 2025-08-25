@@ -48,7 +48,7 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
     <>
       {/* Mobile backdrop */}
       {open && (
-        <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-40 lg:hidden sidebar-backdrop" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
         </div>
       )}
@@ -56,7 +56,7 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 sidebar",
           open ? "translate-x-0" : "-translate-x-full",
           open ? "w-64" : collapsed ? "w-20" : "w-64",
         )}

@@ -73,11 +73,11 @@ export function AccountManagement() {
   return (
     <div className="space-y-6">
       <Card className="bg-card border-border">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-card-foreground">Manajemen Rekening</CardTitle>
-              <CardDescription>Kelola semua rekening keuangan Anda</CardDescription>
+              <CardTitle className="text-card-foreground text-lg sm:text-xl">Manajemen Rekening</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Kelola semua rekening keuangan Anda</CardDescription>
             </div>
             <AddAccountModal 
               onAccountUpdated={handleAccountUpdated}
@@ -86,46 +86,46 @@ export function AccountManagement() {
             />
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
           {accounts.map((account) => {
             const IconComponent = getAccountIcon(account.type)
             return (
               <div
                 key={account.id}
-                className={`p-4 rounded-lg border transition-colors ${
+                className={`p-3 sm:p-4 rounded-lg border transition-colors ${
                   account.isActive ? "bg-muted/50 border-border" : "bg-muted/20 border-border opacity-60"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
-                      <IconComponent className="h-6 w-6 text-primary" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="bg-primary/10 p-2 sm:p-3 rounded-lg flex-shrink-0">
+                      <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-card-foreground">{account.name}</h3>
-                        <Badge variant={account.isActive ? "default" : "secondary"} className="text-xs">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-card-foreground text-sm sm:text-base truncate">{account.name}</h3>
+                        <Badge variant={account.isActive ? "default" : "secondary"} className="text-xs w-fit">
                           {account.isActive ? "Aktif" : "Nonaktif"}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">{getAccountTypeLabel(account.type)}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">{getAccountTypeLabel(account.type)}</p>
                       {account.accountNumber && (
-                        <p className="text-sm text-muted-foreground">{account.accountNumber}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">{account.accountNumber}</p>
                       )}
                       {account.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{account.description}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">{account.description}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-between sm:justify-end gap-3">
                     <div className="text-right">
-                      <div className={`text-lg font-bold ${account.balance >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      <div className={`text-base sm:text-lg font-bold ${account.balance >= 0 ? "text-green-500" : "text-red-500"}`}>
                         {formatCurrency(account.balance)}
                       </div>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
