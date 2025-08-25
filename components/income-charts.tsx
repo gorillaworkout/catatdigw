@@ -42,31 +42,6 @@ export function IncomeCharts() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Monthly Income Trend */}
-      <Card className="bg-card border-border overflow-hidden">
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="text-card-foreground text-lg sm:text-xl">Tren Pendapatan Bulanan</CardTitle>
-          <CardDescription className="text-sm sm:text-base">Pendapatan dalam 6 bulan terakhir</CardDescription>
-        </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          <ChartContainer
-            config={{
-              amount: {
-                label: "Pendapatan",
-                color: "hsl(var(--chart-1))",
-              },
-            }}
-            className="w-full h-64 sm:h-80 aspect-auto overflow-hidden"
-          >
-            <BarChart data={monthlyIncome} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-              <XAxis dataKey="month" fontSize={12} tick={{ fontSize: "12px" }} />
-              <YAxis tickFormatter={(value) => `${value / 1000000}M`} fontSize={12} tick={{ fontSize: "12px" }} width={40} />
-              <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-              <Bar dataKey="amount" fill="var(--color-amount)" radius={4} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Category Breakdown */}
@@ -113,32 +88,6 @@ export function IncomeCharts() {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Daily Accumulation */}
-        <Card className="bg-card border-border overflow-hidden">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="text-card-foreground text-lg sm:text-xl">Akumulasi Harian</CardTitle>
-            <CardDescription className="text-sm sm:text-base">Akumulasi pendapatan bulan ini</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            <ChartContainer
-              config={{
-                amount: {
-                  label: "Pendapatan",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-              className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
-            >
-              <LineChart data={dailyTrend} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                <XAxis dataKey="date" fontSize={12} tick={{ fontSize: "12px" }} />
-                <YAxis tickFormatter={(value) => `${value / 1000000}M`} fontSize={12} tick={{ fontSize: "12px" }} width={40} />
-                <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-                <Line type="monotone" dataKey="amount" stroke="var(--color-amount)" strokeWidth={3} dot={false} activeDot={{ r: 5 }} />
-              </LineChart>
-            </ChartContainer>
           </CardContent>
         </Card>
       </div>

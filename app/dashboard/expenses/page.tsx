@@ -26,12 +26,12 @@ export default function ExpensesPage() {
 
         <Suspense fallback={<DashboardSkeleton />}>
           <ExpenseOverview />
-          <div className="w-full">
-            <ExpenseCharts />
-          </div>
           <div className="w-full space-y-6">
             <ExpenseFilters />
             <ExpensesList />
+          </div>
+          <div className="w-full">
+            <ExpenseCharts />
           </div>
         </Suspense>
       </div>

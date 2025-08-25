@@ -24,12 +24,12 @@ export default function DashboardPage() {
 
         <Suspense fallback={<DashboardSkeleton />}>
           <DashboardOverview />
-          <div className="w-full">
-            <FinancialCharts />
-          </div>
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
             <AccountsList />
             <RecentTransactions />
+          </div>
+          <div className="w-full">
+            <FinancialCharts />
           </div>
         </Suspense>
       </div>

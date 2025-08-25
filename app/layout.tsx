@@ -46,7 +46,7 @@ html {
 }
         `}</style>
       </head>
-      <body className="dark">
+      <body className="dark" suppressHydrationWarning>
         {children}
         <PWAInstall />
       </body>

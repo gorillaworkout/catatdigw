@@ -151,43 +151,6 @@ export function FinancialCharts() {
           </CardContent>
         </Card>
 
-        {/* Balance Trend */}
-        <Card className="bg-card border-border overflow-hidden">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="text-card-foreground text-lg sm:text-xl">Tren Saldo</CardTitle>
-            <CardDescription className="text-sm sm:text-base">Perkembangan saldo dalam 1 bulan terakhir</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            <ChartContainer
-              config={{
-                balance: { label: "Saldo", color: "hsl(var(--chart-1))" },
-              }}
-              className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
-            >
-              <LineChart data={trendData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                <XAxis
-                  dataKey="date"
-                  fontSize={12}
-                  tick={{ fontSize: "12px" }}
-                />
-                <YAxis
-                  tickFormatter={(value) => `${value / 1000000}M`}
-                  fontSize={12}
-                  tick={{ fontSize: "12px" }}
-                  width={40}
-                />
-                <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-                <Line
-                  type="monotone"
-                  dataKey="balance"
-                  stroke="var(--color-balance)"
-                  strokeWidth={2}
-                  dot={{ fill: "var(--color-balance)", strokeWidth: 2, r: 3 }}
-                />
-              </LineChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

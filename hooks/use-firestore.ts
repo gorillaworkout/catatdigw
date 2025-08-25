@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { collection, doc, onSnapshot, query, where, orderBy, type QueryConstraint } from "firebase/firestore"
+import { collection, doc, onSnapshot, query, where, orderBy, type QueryConstraint, limit as limitFirestore } from "firebase/firestore"
 
 // Re-export orderBy for use in components
 export { orderBy }
@@ -50,6 +50,74 @@ export function useUserCollection<T = any>(
       setLoading(false)
     }
   }, [user, subpath, JSON.stringify(constraints)])
+
+  return { data, loading, error }
+}
+
+export function useRecentTransactions(limit: number = 10) {
+  const { user } = useAuth()
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user || !db) {
+      setData([])
+      setLoading(false)
+      return
+    }
+
+    try {
+      const expensesCol = collection(db as any, "users", user.uid, "expenses")
+      const incomeCol = collection(db as any, "users", user.uid, "income")
+      
+      // Query expenses
+      const expensesQuery = query(expensesCol, orderBy("date", "desc"), limitFirestore(limit))
+      const incomeQuery = query(incomeCol, orderBy("date", "desc"), limitFirestore(limit))
+      
+      // Listen to both collections
+      const unsubExpenses = onSnapshot(expensesQuery, (snap) => {
+        const expenses = snap.docs.map(d => ({
+          id: d.id,
+          type: "expense" as const,
+          ...d.data()
+        }))
+        
+        // Get current income data
+        const currentData = data.filter(t => t.type === "income")
+        const allTransactions = [...expenses, ...currentData]
+        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        
+        setData(allTransactions.slice(0, limit))
+        setLoading(false)
+      })
+      
+      const unsubIncome = onSnapshot(incomeQuery, (snap) => {
+        const incomes = snap.docs.map(d => ({
+          id: d.id,
+          type: "income" as const,
+          ...d.data()
+        }))
+        
+        // Get current expense data
+        const currentData = data.filter(t => t.type === "expense")
+        const allTransactions = [...currentData, ...incomes]
+        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        
+        setData(allTransactions.slice(0, limit))
+        setLoading(false)
+      })
+      
+      return () => {
+        unsubExpenses()
+        unsubIncome()
+      }
+    } catch (e) {
+      console.error(e)
+      setError("Gagal memuat transaksi")
+      setLoading(false)
+    }
+  }, [user, limit])
 
   return { data, loading, error }
 }

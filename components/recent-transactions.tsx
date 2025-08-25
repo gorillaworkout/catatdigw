@@ -3,57 +3,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowUpRight, ArrowDownRight, MoreHorizontal } from "lucide-react"
-
-// Mock data
-const transactions = [
-  {
-    id: 1,
-    type: "expense",
-    description: "Belanja Groceries",
-    category: "Makanan",
-    amount: 350000,
-    date: "2024-06-29",
-    account: "BCA Tabungan",
-  },
-  {
-    id: 2,
-    type: "income",
-    description: "Gaji Bulanan",
-    category: "Salary",
-    amount: 8500000,
-    date: "2024-06-28",
-    account: "BCA Tabungan",
-  },
-  {
-    id: 3,
-    type: "expense",
-    description: "Bensin Motor",
-    category: "Transportasi",
-    amount: 50000,
-    date: "2024-06-27",
-    account: "Cash",
-  },
-  {
-    id: 4,
-    type: "expense",
-    description: "Netflix Subscription",
-    category: "Hiburan",
-    amount: 186000,
-    date: "2024-06-26",
-    account: "BCA Tabungan",
-  },
-  {
-    id: 5,
-    type: "income",
-    description: "Freelance Project",
-    category: "Freelance",
-    amount: 2500000,
-    date: "2024-06-25",
-    account: "BCA Tabungan",
-  },
-]
+import { useRecentTransactions } from "@/hooks/use-firestore"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function RecentTransactions() {
+  const { data: transactions, loading, error } = useRecentTransactions(5)
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -67,6 +22,85 @@ export function RecentTransactions() {
       day: "numeric",
       month: "short",
     })
+  }
+
+  if (loading) {
+    return (
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-card-foreground">Transaksi Terbaru</CardTitle>
+              <CardDescription>5 transaksi terakhir</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" disabled>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div>
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+              <div className="text-right">
+                <Skeleton className="h-4 w-20 mb-2" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-card-foreground">Transaksi Terbaru</CardTitle>
+              <CardDescription>5 transaksi terakhir</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-red-500">Gagal memuat transaksi: {error}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-card-foreground">Transaksi Terbaru</CardTitle>
+              <CardDescription>5 transaksi terakhir</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Belum ada transaksi. Mulai mencatat pengeluaran dan pemasukan Anda.
+          </p>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -96,7 +130,7 @@ export function RecentTransactions() {
               <div>
                 <p className="font-medium text-card-foreground">{transaction.description}</p>
                 <p className="text-sm text-muted-foreground">
-                  {transaction.category} • {transaction.account}
+                  {transaction.categoryName || transaction.category} • {transaction.accountName || transaction.account}
                 </p>
               </div>
             </div>

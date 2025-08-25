@@ -26,12 +26,12 @@ export default function IncomePage() {
 
         <Suspense fallback={<DashboardSkeleton />}>
           <IncomeOverview />
-          <div className="w-full">
-            <IncomeCharts />
-          </div>
           <div className="w-full space-y-6">
             <IncomeFilters />
             <IncomesList />
+          </div>
+          <div className="w-full">
+            <IncomeCharts />
           </div>
         </Suspense>
       </div>

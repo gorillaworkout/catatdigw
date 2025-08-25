@@ -16,17 +16,12 @@ let auth: Auth | undefined
 let googleProvider: GoogleAuthProvider | undefined
 let db: Firestore | undefined
 
+// Initialize Firebase only on client side
 if (typeof window !== "undefined") {
-  // Only initialize on client side
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-
-  // Initialize Firebase Authentication and get a reference to the service
   auth = getAuth(app)
   googleProvider = new GoogleAuthProvider()
-
-  // Initialize Cloud Firestore and get a reference to the service
   db = getFirestore(app)
-  
   console.log("Firebase initialized successfully!")
 }
 

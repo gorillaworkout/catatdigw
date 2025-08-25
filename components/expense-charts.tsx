@@ -129,46 +129,6 @@ export function ExpenseCharts() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Daily Trend */}
-        <Card className="bg-card border-border overflow-hidden">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="text-card-foreground text-lg sm:text-xl">Tren Harian</CardTitle>
-            <CardDescription className="text-sm sm:text-base">Pengeluaran harian bulan ini</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            <ChartContainer
-              config={{
-                amount: {
-                  label: "Pengeluaran",
-                  color: "hsl(var(--chart-2))",
-                },
-              }}
-              className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
-            >
-              <LineChart
-                data={(() => {
-                  const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()
-                  const totals = Array.from({ length: daysInMonth }, (_, i) => ({ date: String(i + 1), amount: 0 }))
-                  expenses.forEach((e) => {
-                    const d = e.date ? new Date(e.date) : null
-                    if (!d || d < start || d >= end) return
-                    const idx = d.getDate() - 1
-                    totals[idx].amount += Number(e.amount) || 0
-                  })
-                  return totals
-                })()}
-                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-              >
-                <XAxis dataKey="date" fontSize={12} tick={{ fontSize: "12px" }} />
-                <YAxis tickFormatter={(value) => `${value / 1000}K`} fontSize={12} tick={{ fontSize: "12px" }} width={40} />
-                <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
-                {/* Use a bold line without dots for clarity */}
-                <Line type="monotone" dataKey="amount" stroke="var(--color-amount)" strokeWidth={3} dot={false} activeDot={{ r: 5 }} />
-              </LineChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

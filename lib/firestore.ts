@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit, query, where, runTransaction, serverTimestamp, writeBatch } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, limit as limitFirestore, query, where, runTransaction, serverTimestamp, writeBatch, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 export type ExpenseInput = {
@@ -17,6 +17,8 @@ export async function addExpenseWithBalanceCheck(userId: string, input: ExpenseI
   if (!userId) throw new Error("User belum login")
   if (!input.accountId) throw new Error("Rekening wajib dipilih")
   if (!input.categoryId) throw new Error("Kategori wajib dipilih")
+  if (!input.description?.trim()) throw new Error("Deskripsi pengeluaran wajib diisi")
+  if (!input.date) throw new Error("Tanggal pengeluaran wajib dipilih")
 
   const accountRef = doc(db as any, "users", userId, "accounts", input.accountId)
   const expensesCol = collection(db as any, "users", userId, "expenses")
@@ -29,9 +31,11 @@ export async function addExpenseWithBalanceCheck(userId: string, input: ExpenseI
     const accountData = accountSnap.data() as { balance?: number; name?: string }
     const currentBalance = Number(accountData.balance || 0)
     const amount = Number(input.amount || 0)
-    if (amount <= 0) throw new Error("Jumlah harus lebih dari 0")
+    
+    if (amount <= 0) throw new Error("Jumlah pengeluaran harus lebih dari 0")
     if (currentBalance < amount) {
-      throw new Error("Saldo rekening tidak mencukupi")
+      const shortfall = amount - currentBalance
+      throw new Error(`Saldo rekening tidak mencukupi. Saldo: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(currentBalance)}, Kekurangan: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(shortfall)}`)
     }
 
     const newBalance = currentBalance - amount
@@ -39,7 +43,7 @@ export async function addExpenseWithBalanceCheck(userId: string, input: ExpenseI
 
     const docData = {
       amount,
-      description: input.description,
+      description: input.description.trim(),
       categoryId: input.categoryId,
       categoryName: input.categoryName || null,
       accountId: input.accountId,
@@ -50,6 +54,59 @@ export async function addExpenseWithBalanceCheck(userId: string, input: ExpenseI
       updatedAt: serverTimestamp(),
     }
     transaction.set(doc(expensesCol), docData)
+  })
+}
+
+// Income functions
+export type IncomeInput = {
+  amount: number
+  description: string
+  categoryId: string
+  categoryName?: string
+  accountId: string
+  accountName?: string
+  date: string // ISO yyyy-mm-dd
+  notes?: string
+}
+
+export async function addIncomeWithBalanceUpdate(userId: string, input: IncomeInput) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+  if (!input.accountId) throw new Error("Rekening wajib dipilih")
+  if (!input.categoryId) throw new Error("Kategori wajib dipilih")
+  if (!input.description?.trim()) throw new Error("Deskripsi pendapatan wajib diisi")
+  if (!input.date) throw new Error("Tanggal pendapatan wajib dipilih")
+
+  const accountRef = doc(db as any, "users", userId, "accounts", input.accountId)
+  const incomeCol = collection(db as any, "users", userId, "income")
+
+  await runTransaction(db as any, async (transaction: { get: (arg0: any) => any; update: (arg0: any, arg1: { balance: number }) => void; set: (arg0: any, arg1: { amount: number; description: string; categoryId: string; categoryName: string | null; accountId: string; accountName: string | null; date: string; notes: string; createdAt: any; updatedAt: any }) => void }) => {
+    const accountSnap = await transaction.get(accountRef)
+    if (!accountSnap.exists()) {
+      throw new Error("Rekening tidak ditemukan")
+    }
+    const accountData = accountSnap.data() as { balance?: number; name?: string }
+    const currentBalance = Number(accountData.balance || 0)
+    const amount = Number(input.amount || 0)
+    
+    if (amount <= 0) throw new Error("Jumlah pendapatan harus lebih dari 0")
+
+    const newBalance = currentBalance + amount
+    transaction.update(accountRef, { balance: newBalance })
+
+    const docData = {
+      amount,
+      description: input.description.trim(),
+      categoryId: input.categoryId,
+      categoryName: input.categoryName || null,
+      accountId: input.accountId,
+      accountName: input.accountName || accountData.name || null,
+      date: input.date,
+      notes: input.notes || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }
+    transaction.set(doc(incomeCol), docData)
   })
 }
 
@@ -134,13 +191,13 @@ export async function deleteCategory(userId: string, categoryId: string) {
 // Default accounts to seed for each new user
 export const DEFAULT_ACCOUNTS: Array<{ name: string; type: AccountInput["type"]; balance?: number }> = [
   { name: "Dompet", type: "cash", balance: 0 },
-  { name: "Bank Utama", type: "bank", balance: 0 },
+  { name: "Bank BCA", type: "bank", balance: 0 },
 ]
 
 export async function ensureUserDefaultAccounts(userId: string) {
   if (!db) throw new Error("Firestore belum terinisialisasi")
   const colRef = collection(db as any, "users", userId, "accounts")
-  const anySnap = await getDocs(query(colRef, limit(1)))
+  const anySnap = await getDocs(query(colRef, limitFirestore(1)))
   if (!anySnap.empty) return
 
   const batch = writeBatch(db as any)
@@ -274,6 +331,183 @@ export async function cleanupDuplicateCategories(userId: string) {
   
   await batch.commit()
   console.log(`Cleaned up ${duplicates.length} duplicate categories`)
+}
+
+// Get recent transactions (expenses and income combined)
+export async function getRecentTransactions(userId: string, limitCount: number = 10) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const expensesCol = collection(db as any, "users", userId, "expenses")
+  const incomeCol = collection(db as any, "users", userId, "income")
+  
+  // Get recent expenses
+  const expensesQuery = query(expensesCol, orderBy("date", "desc"), limitFirestore(limitCount))
+  const expensesSnap = await getDocs(expensesQuery)
+  
+  // Get recent income
+  const incomeQuery = query(incomeCol, orderBy("date", "desc"), limitFirestore(limitCount))
+  const incomeSnap = await getDocs(incomeQuery)
+  
+  // Combine and sort by date
+  const expenses = expensesSnap.docs.map(d => ({
+    id: d.id,
+    type: "expense" as const,
+    ...d.data()
+  }))
+  
+  const incomes = incomeSnap.docs.map(d => ({
+    id: d.id,
+    type: "income" as const,
+    ...d.data()
+  }))
+  
+  const allTransactions = [...expenses, ...incomes]
+  allTransactions.sort((a, b) => {
+    const dateA = (a as any).date
+    const dateB = (b as any).date
+    return new Date(dateB).getTime() - new Date(dateA).getTime()
+  })
+  
+  return allTransactions.slice(0, limitCount)
+}
+
+// Get accounts with proper typing
+export async function getAccounts(userId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const accountsCol = collection(db as any, "users", userId, "accounts")
+  const accountsSnap = await getDocs(accountsCol)
+  
+  return accountsSnap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }))
+}
+
+// Get account by ID
+export async function getAccount(userId: string, accountId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const accountRef = doc(db as any, "users", userId, "accounts", accountId)
+  const accountSnap = await getDoc(accountRef)
+  
+  if (!accountSnap.exists()) {
+    return null
+  }
+  
+  return {
+    id: accountSnap.id,
+    ...accountSnap.data()
+  }
+}
+
+export async function deleteExpenseWithBalanceRestore(userId: string, expenseId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+
+  const expenseRef = doc(db as any, "users", userId, "expenses", expenseId)
+  const expensesCol = collection(db as any, "users", userId, "expenses")
+
+  await runTransaction(db as any, async (transaction: { get: (arg0: any) => any; update: (arg0: any, arg1: { balance: number }) => void; delete: (arg0: any) => void }) => {
+    // Get the expense data first
+    const expenseSnap = await transaction.get(expenseRef)
+    if (!expenseSnap.exists()) {
+      throw new Error("Pengeluaran tidak ditemukan")
+    }
+    
+    const expenseData = expenseSnap.data() as ExpenseInput
+    const accountRef = doc(db as any, "users", userId, "accounts", expenseData.accountId)
+    
+    // Get current account balance
+    const accountSnap = await transaction.get(accountRef)
+    if (!accountSnap.exists()) {
+      throw new Error("Rekening tidak ditemukan")
+    }
+    
+    const accountData = accountSnap.data() as { balance?: number; name?: string }
+    const currentBalance = Number(accountData.balance || 0)
+    const expenseAmount = Number(expenseData.amount || 0)
+    
+    // Restore the balance by adding back the expense amount
+    const newBalance = currentBalance + expenseAmount
+    transaction.update(accountRef, { balance: newBalance })
+    
+    // Delete the expense
+    transaction.delete(expenseRef)
+  })
+}
+
+export async function updateExpenseWithBalanceCheck(
+  userId: string, 
+  expenseId: string, 
+  input: ExpenseInput
+) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+  if (!input.accountId) throw new Error("Rekening wajib dipilih")
+  if (!input.categoryId) throw new Error("Kategori wajib dipilih")
+  if (!input.description?.trim()) throw new Error("Deskripsi pengeluaran wajib diisi")
+  if (!input.date) throw new Error("Tanggal pengeluaran wajib dipilih")
+
+  const expenseRef = doc(db as any, "users", userId, "expenses", expenseId)
+  const accountRef = doc(db as any, "users", userId, "accounts", input.accountId)
+
+  await runTransaction(db as any, async (transaction: { 
+    get: (arg0: any) => any; 
+    update: (arg0: any, arg1: any) => void; 
+  }) => {
+    // Get the original expense data
+    const expenseSnap = await transaction.get(expenseRef)
+    if (!expenseSnap.exists()) {
+      throw new Error("Pengeluaran tidak ditemukan")
+    }
+    
+    const originalExpense = expenseSnap.data() as ExpenseInput
+    const originalAmount = Number(originalExpense.amount || 0)
+    const newAmount = Number(input.amount || 0)
+    
+    if (newAmount <= 0) throw new Error("Jumlah pengeluaran harus lebih dari 0")
+    
+    // Get current account balance
+    const accountSnap = await transaction.get(accountRef)
+    if (!accountSnap.exists()) {
+      throw new Error("Rekening tidak ditemukan")
+    }
+    
+    const accountData = accountSnap.data() as { balance?: number; name?: string }
+    const currentBalance = Number(accountData.balance || 0)
+    
+    // Calculate the balance change
+    // First, restore the original expense amount
+    const balanceAfterRestore = currentBalance + originalAmount
+    
+    // Then check if we can deduct the new amount
+    if (balanceAfterRestore < newAmount) {
+      const shortfall = newAmount - balanceAfterRestore
+      throw new Error(`Saldo rekening tidak mencukupi untuk pengeluaran baru. Saldo setelah pengembalian: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(balanceAfterRestore)}, Kekurangan: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(shortfall)}`)
+    }
+    
+    // Calculate final balance
+    const finalBalance = balanceAfterRestore - newAmount
+    
+    // Update account balance
+    transaction.update(accountRef, { balance: finalBalance })
+    
+    // Update the expense
+    const updatedExpenseData = {
+      amount: newAmount,
+      description: input.description.trim(),
+      categoryId: input.categoryId,
+      categoryName: input.categoryName || null,
+      accountId: input.accountId,
+      accountName: input.accountName || accountData.name || null,
+      date: input.date,
+      notes: input.notes || "",
+      updatedAt: serverTimestamp(),
+    }
+    
+    transaction.update(expenseRef, updatedExpenseData)
+  })
 }
 
 
