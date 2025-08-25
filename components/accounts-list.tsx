@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, CreditCard, Wallet, PiggyBank, Building2, Smartphone } from "lucide-react"
 import { useUserCollection } from "@/hooks/use-firestore"
 import { Skeleton } from "@/components/ui/skeleton"
+import { AddAccountModal } from "@/components/add-account-modal"
 
 // Account type to icon mapping
 const getAccountIcon = (type: string) => {
@@ -33,6 +34,11 @@ export function AccountsList() {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(amount)
+  }
+
+  const handleAccountUpdated = () => {
+    // The useUserCollection hook will automatically refresh the data
+    // via onSnapshot, so no manual refresh is needed
   }
 
   if (loading) {
@@ -77,10 +83,7 @@ export function AccountsList() {
               <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
               <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah
-            </Button>
+            <AddAccountModal onAccountUpdated={handleAccountUpdated} />
           </div>
         </CardHeader>
         <CardContent>
@@ -99,10 +102,7 @@ export function AccountsList() {
               <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
               <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah
-            </Button>
+            <AddAccountModal onAccountUpdated={handleAccountUpdated} />
           </div>
         </CardHeader>
         <CardContent>
@@ -122,10 +122,7 @@ export function AccountsList() {
             <CardTitle className="text-card-foreground">Daftar Rekening</CardTitle>
             <CardDescription>Kelola semua akun keuangan Anda</CardDescription>
           </div>
-          <Button size="sm" className="bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah
-          </Button>
+          <AddAccountModal onAccountUpdated={handleAccountUpdated} />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

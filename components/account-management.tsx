@@ -5,26 +5,15 @@ import type React from "react"
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, Trash2, CreditCard, Wallet, PiggyBank, Building, MoreHorizontal } from "lucide-react"
+import { Edit, Trash2, CreditCard, Wallet, PiggyBank, Building, MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { useUserCollection } from "@/hooks/use-firestore"
 import { useAuth } from "@/hooks/use-auth"
-import { createAccount, deleteAccount as deleteAccountFs, updateAccount as updateAccountFs } from "@/lib/firestore"
-import { formatIDR, parseIDR } from "@/lib/utils"
+import { deleteAccount as deleteAccountFs } from "@/lib/firestore"
+import { formatIDR } from "@/lib/utils"
+import { AddAccountModal } from "@/components/add-account-modal"
 
 const accountTypes = [
   { value: "bank", label: "Bank Account", icon: Building },
@@ -39,17 +28,8 @@ type Account = { id: string; name: string; type: string; balance: number; accoun
 export function AccountManagement() {
   const { data: accounts } = useUserCollection<Account>("accounts")
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
-
-  const [formData, setFormData] = useState({
-    name: "",
-    type: "",
-    balance: "",
-    accountNumber: "",
-    description: "",
-  })
 
   const formatCurrency = (amount: number) => formatIDR(amount)
 
@@ -63,48 +43,8 @@ export function AccountManagement() {
     return accountType?.label || "Unknown"
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      if (!user) throw new Error("Harus login")
-      if (editingAccount) {
-        await updateAccountFs(user.uid, editingAccount.id, {
-          name: formData.name,
-          type: formData.type as any,
-          balance: Number(formData.balance || 0),
-          accountNumber: formData.accountNumber,
-          description: formData.description,
-        })
-        toast({ title: "Rekening berhasil diperbarui", description: `${formData.name} telah diperbarui` })
-      } else {
-        await createAccount(user.uid, {
-          name: formData.name,
-          type: formData.type as any,
-          balance: Number(formData.balance || 0),
-          accountNumber: formData.accountNumber,
-          description: formData.description,
-          isActive: true,
-        })
-        toast({ title: "Rekening berhasil ditambahkan", description: `${formData.name} telah ditambahkan` })
-      }
-      setFormData({ name: "", type: "", balance: "", accountNumber: "", description: "" })
-      setEditingAccount(null)
-      setIsDialogOpen(false)
-    } catch (err: any) {
-      toast({ title: "Gagal menyimpan rekening", description: err?.message || String(err) })
-    }
-  }
-
   const handleEdit = (account: Account) => {
     setEditingAccount(account)
-    setFormData({
-      name: account.name,
-      type: account.type,
-      balance: String(account.balance ?? 0),
-      accountNumber: account.accountNumber || "",
-      description: account.description || "",
-    })
-    setIsDialogOpen(true)
   }
 
   const handleDelete = async (accountId: string) => {
@@ -123,6 +63,13 @@ export function AccountManagement() {
     console.log("Toggle account status for:", accountId)
   }
 
+  const handleAccountUpdated = () => {
+    // Reset editing state when account is updated
+    setEditingAccount(null)
+    // The useUserCollection hook will automatically refresh the data
+    // via onSnapshot, so no manual refresh is needed
+  }
+
   return (
     <div className="space-y-6">
       <Card className="bg-card border-border">
@@ -132,114 +79,11 @@ export function AccountManagement() {
               <CardTitle className="text-card-foreground">Manajemen Rekening</CardTitle>
               <CardDescription>Kelola semua rekening keuangan Anda</CardDescription>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => {
-                    setEditingAccount(null)
-                    setFormData({
-                      name: "",
-                      type: "",
-                      balance: "",
-                      accountNumber: "",
-                      description: "",
-                    })
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tambah Rekening
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] bg-card border-border">
-                <DialogHeader>
-                  <DialogTitle className="text-card-foreground">
-                    {editingAccount ? "Edit Rekening" : "Tambah Rekening Baru"}
-                  </DialogTitle>
-                  <DialogDescription>
-                    {editingAccount ? "Perbarui informasi rekening" : "Tambahkan rekening baru ke daftar Anda"}
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-card-foreground">
-                        Nama Rekening *
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="Contoh: BCA Tabungan"
-                        value={formData.name}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                        required
-                        className="bg-background border-border"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-card-foreground">Jenis Rekening *</Label>
-                      <Select
-                        value={formData.type}
-                        onValueChange={(value: string) => setFormData((prev) => ({ ...prev, type: value }))}
-                      >
-                        <SelectTrigger className="bg-background border-border">
-                          <SelectValue placeholder="Pilih jenis" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover border-border">
-                          {accountTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value} className="text-popover-foreground">
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="balance" className="text-card-foreground">
-                        Saldo Awal
-                      </Label>
-                      <Input id="balance" inputMode="numeric" placeholder="Rp 0" value={formatIDR(formData.balance)} onChange={(e) => setFormData((prev) => ({ ...prev, balance: String(parseIDR(e.target.value)) }))} className="bg-background border-border" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="accountNumber" className="text-card-foreground">
-                        Nomor Rekening
-                      </Label>
-                      <Input
-                        id="accountNumber"
-                        placeholder="1234567890"
-                        value={formData.accountNumber}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, accountNumber: e.target.value }))}
-                        className="bg-background border-border"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-card-foreground">
-                      Deskripsi
-                    </Label>
-                    <Input
-                      id="description"
-                      placeholder="Deskripsi rekening..."
-                      value={formData.description}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                      className="bg-background border-border"
-                    />
-                  </div>
-
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Batal
-                    </Button>
-                    <Button type="submit" className="bg-primary hover:bg-primary/90">
-                      {editingAccount ? "Perbarui" : "Tambah"} Rekening
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <AddAccountModal 
+              onAccountUpdated={handleAccountUpdated}
+              title="Tambah Rekening Baru"
+              description="Tambahkan rekening baru ke daftar Anda"
+            />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -304,38 +148,15 @@ export function AccountManagement() {
         </CardContent>
       </Card>
 
-      {/* Account Summary */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-card-foreground">Ringkasan Rekening</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-card-foreground">{accounts.filter((a) => a.isActive).length}</div>
-              <div className="text-sm text-muted-foreground">Rekening Aktif</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">
-                {formatCurrency(accounts.filter((a) => (a.balance || 0) > 0).reduce((sum, a) => sum + (a.balance || 0), 0))}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Aset</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-500">
-                {formatCurrency(Math.abs(accounts.filter((a) => (a.balance || 0) < 0).reduce((sum, a) => sum + (a.balance || 0), 0)))}
-              </div>
-              <div className="text-sm text-muted-foreground">Total Hutang</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">
-                {formatCurrency(accounts.reduce((sum, a) => sum + (a.balance || 0), 0))}
-              </div>
-              <div className="text-sm text-muted-foreground">Net Worth</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Edit Modal - rendered outside the list to prevent conflicts */}
+      {editingAccount && (
+        <AddAccountModal 
+          editingAccount={editingAccount}
+          onAccountUpdated={handleAccountUpdated}
+          title="Edit Rekening"
+          description="Perbarui informasi rekening"
+        />
+      )}
     </div>
   )
 }
