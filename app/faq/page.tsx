@@ -7,10 +7,10 @@ import { MessageCircle, Phone, Mail, ArrowLeft, Home, Settings, HelpCircle } fro
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "FAQ - Pertanyaan yang Sering Diajukan | catatandiGW",
+  title: "FAQ - Pertanyaan yang Sering Diajukan | catatdiGW",
   description:
-    "Temukan jawaban untuk pertanyaan yang sering diajukan tentang aplikasi pencatatan keuangan catatandiGW. Panduan lengkap untuk mengelola keuangan Anda.",
-  keywords: "FAQ, bantuan, panduan, pencatatan keuangan, catatandiGW, tutorial",
+    "Temukan jawaban untuk pertanyaan yang sering diajukan tentang aplikasi pencatatan keuangan catatdiGW. Panduan lengkap untuk mengelola keuangan Anda.",
+  keywords: "FAQ, bantuan, panduan, pencatatan keuangan, catatdiGW, tutorial",
 }
 
 const faqData = [
@@ -18,19 +18,19 @@ const faqData = [
     category: "Memulai",
     questions: [
       {
-        question: "Bagaimana cara mendaftar di catatandiGW?",
+        question: "Bagaimana cara mendaftar di catatdiGW?",
         answer:
           "Anda dapat mendaftar dengan mudah menggunakan akun Google. Klik tombol 'Masuk dengan Google' di halaman utama, dan akun Anda akan langsung terdaftar dan siap digunakan.",
       },
       {
-        question: "Apakah catatandiGW gratis untuk digunakan?",
+        question: "Apakah catatdiGW gratis untuk digunakan?",
         answer:
-          "Ya, catatandiGW sepenuhnya gratis untuk digunakan. Kami menyediakan semua fitur pencatatan keuangan tanpa biaya berlangganan atau biaya tersembunyi.",
+          "Ya, catatdiGW sepenuhnya gratis untuk digunakan. Kami menyediakan semua fitur pencatatan keuangan tanpa biaya berlangganan atau biaya tersembunyi.",
       },
       {
         question: "Bagaimana cara mengunduh aplikasi mobile?",
         answer:
-          "catatandiGW adalah Progressive Web App (PWA). Anda dapat menginstalnya di perangkat mobile dengan membuka website di browser, lalu pilih 'Add to Home Screen' atau 'Install App' dari menu browser.",
+          "catatdiGW adalah Progressive Web App (PWA). Anda dapat menginstalnya di perangkat mobile dengan membuka website di browser, lalu pilih 'Add to Home Screen' atau 'Install App' dari menu browser.",
       },
     ],
   },
@@ -113,7 +113,7 @@ const faqData = [
     category: "Keamanan dan Data",
     questions: [
       {
-        question: "Apakah data saya aman di catatandiGW?",
+        question: "Apakah data saya aman di catatdiGW?",
         answer:
           "Ya, kami menggunakan enkripsi tingkat bank dan autentikasi Google untuk melindungi data Anda. Data disimpan dengan aman di server yang terpercaya.",
       },
@@ -130,7 +130,7 @@ const faqData = [
       {
         question: "Bagaimana jika saya lupa password?",
         answer:
-          "catatandiGW menggunakan autentikasi Google, jadi Anda tidak perlu mengingat password terpisah. Gunakan fitur reset password Google jika diperlukan.",
+          "catatdiGW menggunakan autentikasi Google, jadi Anda tidak perlu mengingat password terpisah. Gunakan fitur reset password Google jika diperlukan.",
       },
     ],
   },
@@ -206,7 +206,7 @@ export default function FAQPage() {
         <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 lg:py-16">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">Pertanyaan yang Sering Diajukan</h1>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">Temukan jawaban untuk pertanyaan umum tentang catatandiGW</p>
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">Temukan jawaban untuk pertanyaan umum tentang catatdiGW</p>
           </div>
         </div>
       </AnimatedDiv>

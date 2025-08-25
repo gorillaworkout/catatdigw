@@ -8,7 +8,7 @@ import { AddExpenseModal } from "@/components/add-expense-modal"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 
 export const metadata = {
-  title: "Pengeluaran - catatandiGW",
+  title: "Pengeluaran - catatdiGW",
   description: "Kelola dan analisis pengeluaran Anda dengan mudah",
 }
 

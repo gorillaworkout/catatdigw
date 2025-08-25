@@ -8,7 +8,7 @@ import { AddIncomeModal } from "@/components/add-income-modal"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 
 export const metadata = {
-  title: "Pendapatan - catatandiGW",
+  title: "Pendapatan - catatdiGW",
   description: "Kelola dan analisis pendapatan Anda dengan mudah",
 }
 

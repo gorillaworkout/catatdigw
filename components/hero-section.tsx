@@ -31,7 +31,7 @@ export function HeroSection() {
 
           <AnimatedDiv direction="right" delay={0.3}>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-              catatandiGW membantu Anda mencatat pengeluaran dan pemasukan dengan interface yang elegan, laporan yang
+              catatdiGW membantu Anda mencatat pengeluaran dan pemasukan dengan interface yang elegan, laporan yang
               detail, dan analisis keuangan yang mendalam.
             </p>
           </AnimatedDiv>

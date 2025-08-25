@@ -2,37 +2,24 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts"
+import { XAxis, YAxis, PieChart, Pie, Cell, LineChart, Line } from "recharts"
+import { where, orderBy } from "firebase/firestore"
+import { useThisMonthRange, useUserCollection } from "@/hooks/use-firestore"
 
-// Mock data
-const monthlyExpenses = [
-  { month: "Jan", amount: 2800000 },
-  { month: "Feb", amount: 3200000 },
-  { month: "Mar", amount: 2900000 },
-  { month: "Apr", amount: 3500000 },
-  { month: "May", amount: 3100000 },
-  { month: "Jun", amount: 3250000 },
-]
-
-const categoryBreakdown = [
-  { name: "Makanan & Minuman", value: 1200000, color: "#10b981" },
-  { name: "Transportasi", value: 800000, color: "#3b82f6" },
-  { name: "Hiburan", value: 600000, color: "#8b5cf6" },
-  { name: "Tagihan", value: 450000, color: "#f59e0b" },
-  { name: "Belanja", value: 200000, color: "#ef4444" },
-]
-
-const dailyTrend = [
-  { date: "1", amount: 150000 },
-  { date: "5", amount: 320000 },
-  { date: "10", amount: 180000 },
-  { date: "15", amount: 450000 },
-  { date: "20", amount: 280000 },
-  { date: "25", amount: 380000 },
-  { date: "30", amount: 220000 },
-]
+type Expense = {
+  amount: number
+  category?: string
+  date?: string | number
+}
 
 export function ExpenseCharts() {
+  const { start, end } = useThisMonthRange()
+  const { data: expenses, loading } = useUserCollection<Expense>("expenses", [
+    where("date", ">=", start.toISOString()),
+    where("date", "<", end.toISOString()),
+    orderBy("date", "asc"),
+  ])
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -44,7 +31,7 @@ export function ExpenseCharts() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Monthly Expenses Trend */}
-      <Card className="bg-card border-border overflow-hidden">
+      {/* <Card className="bg-card border-border overflow-hidden">
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="text-card-foreground text-lg sm:text-xl">Tren Pengeluaran Bulanan</CardTitle>
           <CardDescription className="text-sm sm:text-base">Pengeluaran dalam 6 bulan terakhir</CardDescription>
@@ -67,7 +54,7 @@ export function ExpenseCharts() {
             </BarChart>
           </ChartContainer>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Category Breakdown */}
@@ -88,7 +75,15 @@ export function ExpenseCharts() {
             >
               <PieChart>
                 <Pie
-                  data={categoryBreakdown}
+                  data={(() => {
+                    const categoryMap = new Map<string, number>()
+                    expenses.forEach((e) => {
+                      const cat = e.category || "Tanpa Kategori"
+                      categoryMap.set(cat, (categoryMap.get(cat) || 0) + (Number(e.amount) || 0))
+                    })
+                    const palette = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#14b8a6", "#a855f7", "#f97316"]
+                    return Array.from(categoryMap.entries()).map(([name, value], i) => ({ name, value, color: palette[i % palette.length] }))
+                  })()}
                   cx="50%"
                   cy="50%"
                   innerRadius={40}
@@ -96,23 +91,41 @@ export function ExpenseCharts() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {categoryBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                  {(() => {
+                    const categoryMap = new Map<string, number>()
+                    expenses.forEach((e) => {
+                      const cat = e.category || "Tanpa Kategori"
+                      categoryMap.set(cat, (categoryMap.get(cat) || 0) + (Number(e.amount) || 0))
+                    })
+                    const palette = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#14b8a6", "#a855f7", "#f97316"]
+                    const breakdown = Array.from(categoryMap.entries()).map(([name, value], i) => ({ name, value, color: palette[i % palette.length] }))
+                    return breakdown.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)
+                  })()}
                 </Pie>
                 <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
               </PieChart>
             </ChartContainer>
             <div className="mt-3 sm:mt-4 space-y-2">
-              {categoryBreakdown.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-xs sm:text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-card-foreground truncate">{item.name}</span>
+              {(() => {
+                const categoryMap = new Map<string, number>()
+                expenses.forEach((e) => {
+                  const cat = e.category || "Tanpa Kategori"
+                  categoryMap.set(cat, (categoryMap.get(cat) || 0) + (Number(e.amount) || 0))
+                })
+                const palette = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#14b8a6", "#a855f7", "#f97316"]
+                const breakdown = Array.from(categoryMap.entries()).map(([name, value], i) => ({ name, value, color: palette[i % palette.length] }))
+                if (loading) return <div className="text-xs sm:text-sm text-muted-foreground">Memuat...</div>
+                if (breakdown.length === 0) return <div className="text-xs sm:text-sm text-muted-foreground">Belum ada data bulan ini</div>
+                return breakdown.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between text-xs sm:text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-card-foreground truncate">{item.name}</span>
+                    </div>
+                    <span className="text-muted-foreground font-medium">{formatCurrency(item.value)}</span>
                   </div>
-                  <span className="text-muted-foreground font-medium">{formatCurrency(item.value)}</span>
-                </div>
-              ))}
+                ))
+              })()}
             </div>
           </CardContent>
         </Card>
@@ -133,7 +146,20 @@ export function ExpenseCharts() {
               }}
               className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
             >
-              <LineChart data={dailyTrend} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+              <LineChart
+                data={(() => {
+                  const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()
+                  const totals = Array.from({ length: daysInMonth }, (_, i) => ({ date: String(i + 1), amount: 0 }))
+                  expenses.forEach((e) => {
+                    const d = e.date ? new Date(e.date) : null
+                    if (!d || d < start || d >= end) return
+                    const idx = d.getDate() - 1
+                    totals[idx].amount += Number(e.amount) || 0
+                  })
+                  return totals
+                })()}
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              >
                 <XAxis dataKey="date" fontSize={12} tick={{ fontSize: "12px" }} />
                 <YAxis tickFormatter={(value) => `${value / 1000}K`} fontSize={12} tick={{ fontSize: "12px" }} width={40} />
                 <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />

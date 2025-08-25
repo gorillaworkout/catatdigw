@@ -68,7 +68,7 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
                   <Wallet className="h-4 w-4 text-sidebar-primary-foreground" />
                 </div>
                 {(!collapsed || open) && (
-                  <span className="text-base font-semibold text-sidebar-foreground">catatandiGW</span>
+                  <span className="text-base font-semibold text-sidebar-foreground">catatdiGW</span>
                 )}
               </div>
               {/* Close on mobile */}

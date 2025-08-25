@@ -7,7 +7,7 @@ import { FinancialCharts } from "@/components/financial-charts"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 
 export const metadata = {
-  title: "Dashboard - catatandiGW",
+  title: "Dashboard - catatdiGW",
   description: "Dashboard keuangan dengan statistik dan analisis lengkap",
 }
 

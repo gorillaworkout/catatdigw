@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Search, MessageCircle, Book, Video, Mail } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Bantuan & FAQ - catatandiGW",
-  description: "Pusat bantuan dan pertanyaan yang sering diajukan untuk catatandiGW",
+  title: "Bantuan & FAQ - catatdiGW",
+  description: "Pusat bantuan dan pertanyaan yang sering diajukan untuk catatdiGW",
 }
 
 export default function HelpPage() {
@@ -106,7 +106,7 @@ export default function HelpPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pertanyaan yang Sering Diajukan</CardTitle>
-            <CardDescription>Jawaban untuk pertanyaan umum tentang catatandiGW</CardDescription>
+            <CardDescription>Jawaban untuk pertanyaan umum tentang catatdiGW</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">

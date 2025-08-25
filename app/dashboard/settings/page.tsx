@@ -4,7 +4,7 @@ import { SettingsTabs } from "@/components/settings-tabs"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 
 export const metadata = {
-  title: "Pengaturan - catatandiGW",
+  title: "Pengaturan - catatdiGW",
   description: "Kelola pengaturan akun dan aplikasi Anda",
 }
 

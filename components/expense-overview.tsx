@@ -2,18 +2,42 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingDown, Calendar, Target, PieChart } from "lucide-react"
-
-// Mock data
-const expenseData = {
-  thisMonth: 3250000,
-  lastMonth: 2890000,
-  thisYear: 28500000,
-  budget: 4000000,
-  categories: 8,
-  transactions: 45,
-}
+import { orderBy, where } from "firebase/firestore"
+import { useThisMonthRange, useUserCollection } from "@/hooks/use-firestore"
 
 export function ExpenseOverview() {
+  const { start, end } = useThisMonthRange()
+  const { data: expensesThisMonth } = useUserCollection<any>("expenses", [
+    where("date", ">=", start.toISOString()),
+    where("date", "<", end.toISOString()),
+    orderBy("date", "asc"),
+  ])
+  const thisMonth = expensesThisMonth.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+
+  const lastMonthStart = new Date(start.getFullYear(), start.getMonth() - 1, 1)
+  const lastMonthEnd = new Date(start.getFullYear(), start.getMonth(), 1)
+  const { data: expensesLastMonth } = useUserCollection<any>("expenses", [
+    where("date", ">=", lastMonthStart.toISOString()),
+    where("date", "<", lastMonthEnd.toISOString()),
+    orderBy("date", "asc"),
+  ])
+  const lastMonth = expensesLastMonth.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+
+  const yearStart = new Date(start.getFullYear(), 0, 1)
+  const nextYearStart = new Date(start.getFullYear() + 1, 0, 1)
+  const { data: expensesThisYear } = useUserCollection<any>("expenses", [
+    where("date", ">=", yearStart.toISOString()),
+    where("date", "<", nextYearStart.toISOString()),
+    orderBy("date", "asc"),
+  ])
+  const thisYear = expensesThisYear.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+
+  const categoriesUsed = new Set<string>()
+  expensesThisMonth.forEach((e) => categoriesUsed.add(e.categoryId || e.categoryName || "-"))
+  const activeCategories = categoriesUsed.has("-") ? categoriesUsed.size - 1 : categoriesUsed.size
+
+  const budget = 0 // default 0 jika belum ada fitur budget
+  const transactions = expensesThisMonth.length
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -22,13 +46,13 @@ export function ExpenseOverview() {
     }).format(amount)
   }
 
-  const monthlyChange = ((expenseData.thisMonth - expenseData.lastMonth) / expenseData.lastMonth) * 100
-  const budgetUsed = (expenseData.thisMonth / expenseData.budget) * 100
+  const monthlyChange = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0
+  const budgetUsed = budget > 0 ? (thisMonth / budget) * 100 : 0
 
   const cards = [
     {
       title: "Pengeluaran Bulan Ini",
-      value: formatCurrency(expenseData.thisMonth),
+      value: formatCurrency(thisMonth),
       icon: TrendingDown,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
@@ -42,27 +66,27 @@ export function ExpenseOverview() {
       icon: Target,
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
-      change: formatCurrency(expenseData.budget - expenseData.thisMonth),
+      change: formatCurrency(Math.max(0, budget - thisMonth)),
       changeType: "neutral" as const,
       description: "sisa budget",
     },
     {
       title: "Pengeluaran Tahun Ini",
-      value: formatCurrency(expenseData.thisYear),
+      value: formatCurrency(thisYear),
       icon: Calendar,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
-      change: `${expenseData.transactions} transaksi`,
+      change: `${transactions} transaksi`,
       changeType: "neutral" as const,
       description: "total transaksi",
     },
     {
       title: "Kategori Aktif",
-      value: expenseData.categories.toString(),
+      value: String(activeCategories),
       icon: PieChart,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
-      change: "8 kategori",
+      change: `${activeCategories} kategori`,
       changeType: "neutral" as const,
       description: "digunakan bulan ini",
     },

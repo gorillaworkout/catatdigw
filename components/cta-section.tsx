@@ -28,7 +28,7 @@ export function CTASection() {
 
           <AnimatedDiv direction="right" delay={0.3}>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Bergabunglah dengan ribuan pengguna yang sudah merasakan kemudahan mengelola keuangan dengan catatandiGW.
+              Bergabunglah dengan ribuan pengguna yang sudah merasakan kemudahan mengelola keuangan dengan catatdiGW.
               Gratis untuk memulai!
             </p>
           </AnimatedDiv>

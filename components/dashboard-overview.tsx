@@ -2,16 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, Wallet, PieChart } from "lucide-react"
-
-// Mock data - in real app, this would come from your database
-const mockData = {
-  totalBalance: 15750000,
-  totalIncome: 8500000,
-  totalExpenses: 3250000,
-  savingsRate: 62,
-}
+import { useUserCollection } from "@/hooks/use-firestore"
 
 export function DashboardOverview() {
+  const { data: accounts } = useUserCollection<any>("accounts")
+  const { data: incomes } = useUserCollection<any>("income")
+  const { data: expenses } = useUserCollection<any>("expenses")
+
+  const totalBalance = accounts.reduce((sum, a) => sum + Number(a.balance || 0), 0)
+  const totalIncome = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0)
+  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+  const savingsRate = totalIncome > 0 ? Math.max(0, Math.round(((totalIncome - totalExpenses) / totalIncome) * 100)) : 0
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -21,42 +22,10 @@ export function DashboardOverview() {
   }
 
   const cards = [
-    {
-      title: "Total Saldo",
-      value: formatCurrency(mockData.totalBalance),
-      icon: Wallet,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      change: "+12.5%",
-      changeType: "positive" as const,
-    },
-    {
-      title: "Total Pendapatan",
-      value: formatCurrency(mockData.totalIncome),
-      icon: TrendingUp,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      change: "+8.2%",
-      changeType: "positive" as const,
-    },
-    {
-      title: "Total Pengeluaran",
-      value: formatCurrency(mockData.totalExpenses),
-      icon: TrendingDown,
-      color: "text-red-500",
-      bgColor: "bg-red-500/10",
-      change: "-3.1%",
-      changeType: "negative" as const,
-    },
-    {
-      title: "Tingkat Tabungan",
-      value: `${mockData.savingsRate}%`,
-      icon: PieChart,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      change: "+5.3%",
-      changeType: "positive" as const,
-    },
+    { title: "Total Saldo", value: formatCurrency(totalBalance), icon: Wallet, color: "text-blue-500", bgColor: "bg-blue-500/10", change: "", changeType: "positive" as const },
+    { title: "Total Pendapatan", value: formatCurrency(totalIncome), icon: TrendingUp, color: "text-green-500", bgColor: "bg-green-500/10", change: "", changeType: "positive" as const },
+    { title: "Total Pengeluaran", value: formatCurrency(totalExpenses), icon: TrendingDown, color: "text-red-500", bgColor: "bg-red-500/10", change: "", changeType: "negative" as const },
+    { title: "Tingkat Tabungan", value: `${savingsRate}%`, icon: PieChart, color: "text-purple-500", bgColor: "bg-purple-500/10", change: "", changeType: "positive" as const },
   ]
 
   return (

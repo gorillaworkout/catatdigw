@@ -6,10 +6,10 @@ import { ArrowLeft, Target, Users, Shield, Zap, Heart, Award } from "lucide-reac
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Tentang catatandiGW - Aplikasi Pencatatan Keuangan",
+  title: "Tentang catatdiGW - Aplikasi Pencatatan Keuangan",
   description:
-    "Pelajari lebih lanjut tentang catatandiGW, aplikasi pencatatan keuangan yang membantu Anda mengelola pengeluaran dan pemasukan dengan mudah dan aman.",
-  keywords: "tentang catatandigw, aplikasi keuangan, pencatatan pengeluaran, manajemen keuangan personal",
+    "Pelajari lebih lanjut tentang catatdiGW, aplikasi pencatatan keuangan yang membantu Anda mengelola pengeluaran dan pemasukan dengan mudah dan aman.",
+  keywords: "tentang catatdiGW, aplikasi keuangan, pencatatan pengeluaran, manajemen keuangan personal",
 }
 
 export default function AboutPage() {
@@ -73,7 +73,7 @@ export default function AboutPage() {
             Tentang Kami
           </Badge>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            catatandiGW
+            catatdiGW
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Aplikasi pencatatan keuangan yang membantu Anda mengelola pengeluaran dan pemasukan dengan mudah, aman, dan
@@ -114,7 +114,7 @@ export default function AboutPage() {
         {/* Features */}
         <section className="space-y-6 sm:space-y-8">
           <div className="text-center space-y-3 sm:space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-bold">Mengapa Memilih catatandiGW?</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">Mengapa Memilih catatdiGW?</h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
               Kami menghadirkan solusi pencatatan keuangan yang komprehensif dengan fitur-fitur unggulan
             </p>
@@ -175,7 +175,7 @@ export default function AboutPage() {
         <section className="text-center space-y-4 sm:space-y-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl sm:rounded-2xl p-6 sm:p-8 lg:p-12 text-white">
           <h2 className="text-2xl sm:text-3xl font-bold">Siap Mengelola Keuangan Anda?</h2>
           <p className="text-blue-100 max-w-2xl mx-auto text-sm sm:text-base">
-            Bergabunglah dengan ribuan pengguna yang telah merasakan kemudahan mengelola keuangan dengan catatandiGW
+            Bergabunglah dengan ribuan pengguna yang telah merasakan kemudahan mengelola keuangan dengan catatdiGW
           </p>
           <Link href="/dashboard">
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50 text-sm sm:text-base">

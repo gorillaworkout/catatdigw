@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { type User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
-import { auth, googleProvider } from "@/lib/firebase"
+import { auth, googleProvider, db } from "@/lib/firebase"
+import { ensureUserBootstrap } from "@/lib/firestore"
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -16,10 +18,43 @@ export function useAuth() {
       return
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
-      setLoading(false)
-      setError(null)
+    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
+      try {
+        setUser(user)
+        setError(null)
+
+        // On first login, create the user profile document if it doesn't exist yet
+        if (user && db) {
+          const userRef = doc(db as any, "users", user.uid)
+          const snap = await getDoc(userRef)
+          if (!snap.exists()) {
+            await setDoc(userRef, {
+              uid: user.uid,
+              displayName: user.displayName || "",
+              email: user.email || "",
+              photoURL: user.photoURL || "",
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
+            } as any)
+            // Seed default collections for first-time users
+            await ensureUserBootstrap(user.uid)
+          } else {
+            // keep updatedAt fresh on subsequent logins
+            await setDoc(
+              userRef,
+              { updatedAt: serverTimestamp() } as any,
+              { merge: true } as any
+            )
+            // Attempt to ensure defaults exist even if user doc already present
+            ensureUserBootstrap(user.uid).catch(() => {})
+          }
+        }
+      } catch (e) {
+        console.error(e)
+        setError("Gagal menyiapkan data pengguna")
+      } finally {
+        setLoading(false)
+      }
     })
 
     return () => unsubscribe()

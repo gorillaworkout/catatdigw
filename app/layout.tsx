@@ -6,12 +6,12 @@ import "./globals.css"
 import { PWAInstall } from "@/components/pwa-install"
 
 export const metadata: Metadata = {
-  title: "catatandiGW - Pencatatan Keuangan",
+  title: "catatdiGW - Pencatatan Keuangan",
   description: "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
   generator: "Next.js",
   manifest: "/manifest.json",
   keywords: ["keuangan", "pencatatan", "pengeluaran", "pemasukan", "budget", "finance"],
-  authors: [{ name: "catatandiGW Team" }],
+  authors: [{ name: "catatdiGW Team" }],
   icons: {
     icon: "/icon-192x192.png",
     apple: "/icon-192x192.png",
@@ -26,12 +26,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <head>
-        <meta name="application-name" content="catatandiGW" />
+        <meta name="application-name" content="catatdiGW" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="catatandiGW" />
+        <meta name="apple-mobile-web-app-title" content="catatdiGW" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#1f2937" />

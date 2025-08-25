@@ -6,20 +6,20 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Search, Filter, X, Calendar } from "lucide-react"
+import { useUserCollection } from "@/hooks/use-firestore"
 
-const categories = [
-  "Semua Kategori",
-  "Makanan & Minuman",
-  "Transportasi",
-  "Belanja",
-  "Hiburan",
-  "Kesehatan",
-  "Pendidikan",
-  "Tagihan",
-  "Lainnya",
-]
-
-const accounts = ["Semua Rekening", "BCA Tabungan", "Cash", "Investasi"]
+type Category = { id: string; name: string }
+type Account = { id: string; name: string }
+const DEFAULT_CATEGORY = { id: "__all__", name: "Semua Kategori" }
+const DEFAULT_ACCOUNT = { id: "__all__", name: "Semua Rekening" }
+export function useFilterData() {
+  const { data: categories } = useUserCollection<Category>("categories")
+  const { data: accounts } = useUserCollection<Account>("accounts")
+  return {
+    categories: [DEFAULT_CATEGORY, ...categories],
+    accounts: [DEFAULT_ACCOUNT, ...accounts],
+  }
+}
 
 const sortOptions = [
   { value: "date-desc", label: "Tanggal Terbaru" },
@@ -29,10 +29,11 @@ const sortOptions = [
 ]
 
 export function ExpenseFilters() {
+  const { categories, accounts } = useFilterData()
   const [filters, setFilters] = useState({
     search: "",
-    category: "Semua Kategori",
-    account: "Semua Rekening",
+    category: DEFAULT_CATEGORY.id,
+    account: DEFAULT_ACCOUNT.id,
     dateFrom: "",
     dateTo: "",
     sort: "date-desc",
@@ -58,8 +59,8 @@ export function ExpenseFilters() {
 
   const hasActiveFilters =
     filters.search !== "" ||
-    filters.category !== "Semua Kategori" ||
-    filters.account !== "Semua Rekening" ||
+    filters.category !== DEFAULT_CATEGORY.id ||
+    filters.account !== DEFAULT_ACCOUNT.id ||
     filters.dateFrom !== "" ||
     filters.dateTo !== ""
 
@@ -108,8 +109,8 @@ export function ExpenseFilters() {
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
                     {categories.map((category) => (
-                      <SelectItem key={category} value={category} className="text-popover-foreground">
-                        {category}
+                      <SelectItem key={category.id} value={category.id} className="text-popover-foreground">
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -124,8 +125,8 @@ export function ExpenseFilters() {
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
                     {accounts.map((account) => (
-                      <SelectItem key={account} value={account} className="text-popover-foreground">
-                        {account}
+                      <SelectItem key={account.id} value={account.id} className="text-popover-foreground">
+                        {account.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

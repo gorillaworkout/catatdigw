@@ -123,7 +123,7 @@ export function DataManagement() {
               <span className="font-medium text-card-foreground">Format yang Didukung</span>
             </div>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• JSON - Format backup catatandiGW</li>
+              <li>• JSON - Format backup catatdiGW</li>
               <li>• CSV - Data dari aplikasi keuangan lain</li>
               <li>• Excel - File spreadsheet (.xlsx)</li>
             </ul>

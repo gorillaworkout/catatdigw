@@ -1,6 +1,6 @@
 {
-  "name": "catatandiGW - Pencatatan Keuangan",
-  "short_name": "catatandiGW",
+  "name": "catatdiGW - Pencatatan Keuangan",
+  "short_name": "catatdiGW",
   "description": "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
   "start_url": "/",
   "display": "standalone",

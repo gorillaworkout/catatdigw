@@ -12,7 +12,7 @@ export function Footer() {
               <div className="bg-primary rounded-lg p-2">
                 <Wallet className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-card-foreground">catatandiGW</span>
+              <span className="text-xl font-bold text-card-foreground">catatdiGW</span>
             </div>
             <p className="text-muted-foreground mb-4 max-w-md">
               Aplikasi pencatatan keuangan yang elegan dan mudah digunakan. Kelola pengeluaran dan pemasukan Anda dengan
@@ -21,7 +21,7 @@ export function Footer() {
             <div className="flex space-x-4">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 mr-2" />
-                support@catatandigw.com
+                support@catatdiGW.com
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground">© 2024 catatandiGW. Semua hak dilindungi undang-undang.</p>
+          <p className="text-muted-foreground">© 2024 catatdiGW. Semua hak dilindungi undang-undang.</p>
         </div>
       </div>
     </footer>

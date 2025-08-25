@@ -1,4 +1,4 @@
-const CACHE_NAME = "catatandigw-v1"
+const CACHE_NAME = "catatdiGW-v1"
 const urlsToCache = ["/", "/static/js/bundle.js", "/static/css/main.css", "/manifest.json"]
 
 self.addEventListener("install", (event) => {

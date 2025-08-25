@@ -19,7 +19,7 @@ export function Header() {
             <div className="bg-primary rounded-lg p-2">
               <Wallet className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">catatandiGW</span>
+            <span className="text-xl font-bold text-foreground">catatdiGW</span>
           </div>
 
           {/* Desktop Navigation */}

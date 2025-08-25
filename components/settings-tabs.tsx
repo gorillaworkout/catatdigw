@@ -15,15 +15,15 @@ export function SettingsTabs() {
         <TabsTrigger value="accounts" className="text-sm">
           Rekening
         </TabsTrigger>
-        <TabsTrigger value="profile" className="text-sm">
+        {/* <TabsTrigger value="profile" className="text-sm">
           Profil
-        </TabsTrigger>
-        <TabsTrigger value="preferences" className="text-sm">
+        </TabsTrigger> */}
+        {/* <TabsTrigger value="preferences" className="text-sm">
           Preferensi
-        </TabsTrigger>
-        <TabsTrigger value="security" className="text-sm">
+        </TabsTrigger> */}
+        {/* <TabsTrigger value="security" className="text-sm">
           Keamanan
-        </TabsTrigger>
+        </TabsTrigger> */}
         <TabsTrigger value="categories" className="text-sm">
           Kategori
         </TabsTrigger>

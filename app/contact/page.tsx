@@ -8,9 +8,9 @@ import { ArrowLeft, Mail, MessageCircle, Phone, MapPin, Clock, Send } from "luci
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Hubungi Kami - catatandiGW",
-  description: "Hubungi tim catatandiGW untuk pertanyaan, saran, atau bantuan teknis. Kami siap membantu Anda 24/7.",
-  keywords: "kontak catatandigw, bantuan, support, customer service, hubungi kami",
+  title: "Hubungi Kami - catatdiGW",
+  description: "Hubungi tim catatdiGW untuk pertanyaan, saran, atau bantuan teknis. Kami siap membantu Anda 24/7.",
+  keywords: "kontak catatdiGW, bantuan, support, customer service, hubungi kami",
 }
 
 export default function ContactPage() {
@@ -19,7 +19,7 @@ export default function ContactPage() {
       icon: Mail,
       title: "Email",
       description: "Kirim email untuk pertanyaan detail",
-      contact: "support@catatandigw.com",
+      contact: "support@catatdiGW.com",
       available: "24/7",
     },
     {
@@ -41,7 +41,7 @@ export default function ContactPage() {
   const officeInfo = [
     { icon: MapPin, label: "Alamat", value: "Jl. Sudirman No. 123, Jakarta Pusat 10220" },
     { icon: Clock, label: "Jam Operasional", value: "Senin - Jumat: 08:00 - 17:00 WIB" },
-    { icon: Mail, label: "Email Bisnis", value: "business@catatandigw.com" },
+    { icon: Mail, label: "Email Bisnis", value: "business@catatdiGW.com" },
   ]
 
   return (

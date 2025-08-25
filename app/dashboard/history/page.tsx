@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { History, Download, Upload, Shield, Clock, Database, AlertCircle } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Riwayat & Backup - catatandiGW",
+  title: "Riwayat & Backup - catatdiGW",
   description: "Kelola riwayat aktivitas dan backup data keuangan Anda",
 }
 

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,29 +21,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
+import { useUserCollection } from "@/hooks/use-firestore"
+import { createCategory, deleteCategory as deleteCategoryFs, updateCategory as updateCategoryFs } from "@/lib/firestore"
 
-// Mock data
-const initialExpenseCategories = [
-  { id: 1, name: "Makanan & Minuman", color: "#10b981", isDefault: true, transactionCount: 45 },
-  { id: 2, name: "Transportasi", color: "#3b82f6", isDefault: true, transactionCount: 23 },
-  { id: 3, name: "Belanja", color: "#ef4444", isDefault: true, transactionCount: 18 },
-  { id: 4, name: "Hiburan", color: "#8b5cf6", isDefault: true, transactionCount: 12 },
-  { id: 5, name: "Kesehatan", color: "#f59e0b", isDefault: true, transactionCount: 8 },
-  { id: 6, name: "Pendidikan", color: "#06b6d4", isDefault: true, transactionCount: 5 },
-  { id: 7, name: "Tagihan", color: "#ec4899", isDefault: true, transactionCount: 15 },
-  { id: 8, name: "Lainnya", color: "#6b7280", isDefault: true, transactionCount: 7 },
-]
-
-const initialIncomeCategories = [
-  { id: 1, name: "Gaji", color: "#3b82f6", isDefault: true, transactionCount: 12 },
-  { id: 2, name: "Freelance", color: "#8b5cf6", isDefault: true, transactionCount: 8 },
-  { id: 3, name: "Bisnis", color: "#10b981", isDefault: true, transactionCount: 15 },
-  { id: 4, name: "Investasi", color: "#f59e0b", isDefault: true, transactionCount: 6 },
-  { id: 5, name: "Dividen", color: "#06b6d4", isDefault: true, transactionCount: 4 },
-  { id: 6, name: "Bonus", color: "#ec4899", isDefault: true, transactionCount: 3 },
-  { id: 7, name: "Hadiah", color: "#eab308", isDefault: true, transactionCount: 2 },
-  { id: 8, name: "Lainnya", color: "#6b7280", isDefault: true, transactionCount: 5 },
-]
+type Category = { id: string; name: string; color: string; type: "expense" | "income"; isDefault?: boolean }
 
 const colorOptions = [
   "#3b82f6", // blue
@@ -58,8 +40,10 @@ const colorOptions = [
 ]
 
 export function CategoryManagement() {
-  const [expenseCategories, setExpenseCategories] = useState(initialExpenseCategories)
-  const [incomeCategories, setIncomeCategories] = useState(initialIncomeCategories)
+  const { user } = useAuth()
+  const { data: allCategories } = useUserCollection<Category>("categories")
+  const expenseCategories = useMemo(() => allCategories.filter((c) => c.type === "expense"), [allCategories])
+  const incomeCategories = useMemo(() => allCategories.filter((c) => c.type === "income"), [allCategories])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("expense")
@@ -70,43 +54,24 @@ export function CategoryManagement() {
     color: colorOptions[0],
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    const categories = activeTab === "expense" ? expenseCategories : incomeCategories
-    const setCategories = activeTab === "expense" ? setExpenseCategories : setIncomeCategories
-
-    if (editingCategory) {
-      // Update existing category
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat.id === editingCategory.id ? { ...cat, name: formData.name, color: formData.color } : cat,
-        ),
-      )
-      toast({
-        title: "Kategori berhasil diperbarui",
-        description: `${formData.name} telah diperbarui`,
-      })
-    } else {
-      // Add new category
-      const newCategory = {
-        id: Math.max(...categories.map((c) => c.id)) + 1,
-        name: formData.name,
-        color: formData.color,
-        isDefault: false,
-        transactionCount: 0,
+    try {
+      if (!user) throw new Error("Harus login")
+      const type = activeTab as "expense" | "income"
+      if (editingCategory) {
+        await updateCategoryFs(user.uid, editingCategory.id, { name: formData.name, color: formData.color })
+        toast({ title: "Kategori berhasil diperbarui", description: `${formData.name} telah diperbarui` })
+      } else {
+        await createCategory(user.uid, { name: formData.name, color: formData.color, type })
+        toast({ title: "Kategori berhasil ditambahkan", description: `${formData.name} telah ditambahkan` })
       }
-      setCategories((prev) => [...prev, newCategory])
-      toast({
-        title: "Kategori berhasil ditambahkan",
-        description: `${formData.name} telah ditambahkan`,
-      })
+      setFormData({ name: "", color: colorOptions[0] })
+      setEditingCategory(null)
+      setIsDialogOpen(false)
+    } catch (err: any) {
+      toast({ title: "Gagal menyimpan kategori", description: err?.message || String(err) })
     }
-
-    // Reset form
-    setFormData({ name: "", color: colorOptions[0] })
-    setEditingCategory(null)
-    setIsDialogOpen(false)
   }
 
   const handleEdit = (category: any) => {
@@ -118,25 +83,14 @@ export function CategoryManagement() {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (categoryId: number) => {
-    const categories = activeTab === "expense" ? expenseCategories : incomeCategories
-    const setCategories = activeTab === "expense" ? setExpenseCategories : setIncomeCategories
-
-    const category = categories.find((c) => c.id === categoryId)
-    if (category?.isDefault) {
-      toast({
-        title: "Tidak dapat menghapus",
-        description: "Kategori default tidak dapat dihapus",
-        variant: "destructive",
-      })
-      return
+  const handleDelete = async (categoryId: string) => {
+    try {
+      if (!user) throw new Error("Harus login")
+      await deleteCategoryFs(user.uid, categoryId)
+      toast({ title: "Kategori berhasil dihapus", description: "Kategori telah dihapus" })
+    } catch (err: any) {
+      toast({ title: "Gagal menghapus kategori", description: err?.message || String(err) })
     }
-
-    setCategories((prev) => prev.filter((cat) => cat.id !== categoryId))
-    toast({
-      title: "Kategori berhasil dihapus",
-      description: "Kategori telah dihapus dari daftar",
-    })
   }
 
   const CategoryList = ({ categories, type }: { categories: any[]; type: string }) => (
@@ -154,7 +108,7 @@ export function CategoryManagement() {
                   </Badge>
                 )}
               </div>
-              <div className="text-sm text-muted-foreground">{category.transactionCount} transaksi</div>
+              {/* Transaksi per kategori dihilangkan karena tidak dihitung di sisi client */}
             </div>
           </div>
           <DropdownMenu>

@@ -6,82 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Edit, Trash2, Receipt } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useUserCollection, orderBy } from "@/hooks/use-firestore"
 
-// Mock data
-const expenses = [
-  {
-    id: 1,
-    description: "Belanja Groceries Superindo",
-    amount: 450000,
-    category: "Makanan & Minuman",
-    account: "BCA Tabungan",
-    date: "2024-06-29",
-    notes: "Belanja bulanan untuk kebutuhan dapur",
-  },
-  {
-    id: 2,
-    description: "Bensin Motor",
-    amount: 50000,
-    category: "Transportasi",
-    account: "Cash",
-    date: "2024-06-28",
-    notes: "",
-  },
-  {
-    id: 3,
-    description: "Netflix Subscription",
-    amount: 186000,
-    category: "Hiburan",
-    account: "BCA Tabungan",
-    date: "2024-06-27",
-    notes: "Langganan bulanan Netflix Premium",
-  },
-  {
-    id: 4,
-    description: "Makan Siang di Restoran",
-    amount: 125000,
-    category: "Makanan & Minuman",
-    account: "Cash",
-    date: "2024-06-27",
-    notes: "Makan siang dengan teman kerja",
-  },
-  {
-    id: 5,
-    description: "Obat Flu",
-    amount: 35000,
-    category: "Kesehatan",
-    account: "Cash",
-    date: "2024-06-26",
-    notes: "Beli obat flu di apotek",
-  },
-  {
-    id: 6,
-    description: "Tagihan Listrik",
-    amount: 280000,
-    category: "Tagihan",
-    account: "BCA Tabungan",
-    date: "2024-06-25",
-    notes: "Tagihan listrik bulan Juni",
-  },
-  {
-    id: 7,
-    description: "Beli Baju",
-    amount: 320000,
-    category: "Belanja",
-    account: "BCA Tabungan",
-    date: "2024-06-24",
-    notes: "Beli kemeja untuk kerja",
-  },
-  {
-    id: 8,
-    description: "Kopi di Cafe",
-    amount: 45000,
-    category: "Makanan & Minuman",
-    account: "Cash",
-    date: "2024-06-24",
-    notes: "",
-  },
-]
+type Expense = {
+  id: string
+  amount: number
+  description: string
+  categoryName?: string
+  categoryId?: string
+  accountName?: string
+  accountId?: string
+  date: string
+  notes?: string
+}
 
 const categoryColors: Record<string, string> = {
   "Makanan & Minuman": "bg-green-500/10 text-green-500 border-green-500/20",
@@ -94,6 +31,7 @@ const categoryColors: Record<string, string> = {
 }
 
 export function ExpensesList() {
+  const { data: expenses, loading } = useUserCollection<Expense>("expenses", [orderBy("date", "desc")])
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
   const totalPages = Math.ceil(expenses.length / itemsPerPage)
@@ -121,7 +59,7 @@ export function ExpensesList() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-card-foreground">Daftar Pengeluaran</CardTitle>
-          <div className="text-sm text-muted-foreground">{expenses.length} transaksi</div>
+          <div className="text-sm text-muted-foreground">{loading ? "Memuat..." : `${expenses.length} transaksi`}</div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -139,12 +77,12 @@ export function ExpensesList() {
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
                           variant="outline"
-                          className={categoryColors[expense.category] || categoryColors["Lainnya"]}
+                          className={categoryColors[expense.categoryName || "Lainnya"] || categoryColors["Lainnya"]}
                         >
-                          {expense.category}
+                          {expense.categoryName || "Lainnya"}
                         </Badge>
                         <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{expense.account}</span>
+                        <span className="text-sm text-muted-foreground">{expense.accountName || expense.accountId}</span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">{formatDate(expense.date)}</span>
                       </div>

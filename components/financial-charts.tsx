@@ -2,33 +2,9 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts"
-
-// Mock data
-const monthlyData = [
-  { month: "Jan", income: 7500000, expenses: 3200000 },
-  { month: "Feb", income: 8200000, expenses: 2800000 },
-  { month: "Mar", income: 7800000, expenses: 3500000 },
-  { month: "Apr", income: 9100000, expenses: 3100000 },
-  { month: "May", income: 8500000, expenses: 3250000 },
-  { month: "Jun", income: 8800000, expenses: 2900000 },
-]
-
-const categoryData = [
-  { name: "Makanan", value: 1200000, color: "#3b82f6" },
-  { name: "Transportasi", value: 800000, color: "#ef4444" },
-  { name: "Hiburan", value: 600000, color: "#f59e0b" },
-  { name: "Belanja", value: 450000, color: "#10b981" },
-  { name: "Lainnya", value: 200000, color: "#8b5cf6" },
-]
-
-const trendData = [
-  { date: "1 Jun", balance: 12500000 },
-  { date: "8 Jun", balance: 13200000 },
-  { date: "15 Jun", balance: 14100000 },
-  { date: "22 Jun", balance: 15200000 },
-  { date: "29 Jun", balance: 15750000 },
-]
+import { BarChart, Bar, XAxis, YAxis, LineChart, Line, PieChart, Pie, Cell } from "recharts"
+import { useUserCollection, useThisMonthRange } from "@/hooks/use-firestore"
+import { orderBy, where } from "firebase/firestore"
 
 export function FinancialCharts() {
   const formatCurrency = (value: number) => {
@@ -38,6 +14,61 @@ export function FinancialCharts() {
       minimumFractionDigits: 0,
     }).format(value)
   }
+
+  // 6 bulan terakhir income vs expenses (agregasi client-side)
+  const now = new Date()
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  const { data: incomes } = useUserCollection<any>("income", [
+    where("date", ">=", sixMonthsAgo.toISOString()),
+    where("date", "<", nextMonth.toISOString()),
+    orderBy("date", "asc"),
+  ])
+  const { data: expenses } = useUserCollection<any>("expenses", [
+    where("date", ">=", sixMonthsAgo.toISOString()),
+    where("date", "<", nextMonth.toISOString()),
+    orderBy("date", "asc"),
+  ])
+
+  const monthKeys = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(sixMonthsAgo.getFullYear(), sixMonthsAgo.getMonth() + i, 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+  })
+  const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+  const monthly = monthKeys.map((key) => ({ key, month: monthLabels[Number(key.split("-")[1]) - 1], income: 0, expenses: 0 }))
+  incomes.forEach((i: any) => {
+    const d = new Date(i.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+    const row = monthly.find((m) => m.key === key)
+    if (row) row.income += Number(i.amount || 0)
+  })
+  expenses.forEach((e: any) => {
+    const d = new Date(e.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+    const row = monthly.find((m) => m.key === key)
+    if (row) row.expenses += Number(e.amount || 0)
+  })
+
+  // Breakdown kategori bulan ini
+  const { start, end } = useThisMonthRange()
+  const { data: expensesThisMonth } = useUserCollection<any>("expenses", [
+    where("date", ">=", start.toISOString()),
+    where("date", "<", end.toISOString()),
+    orderBy("date", "asc"),
+  ])
+  const categoryMap = new Map<string, number>()
+  expensesThisMonth.forEach((e) => {
+    const name = e.categoryName || "Tanpa Kategori"
+    categoryMap.set(name, (categoryMap.get(name) || 0) + Number(e.amount || 0))
+  })
+  const palette = ["#3b82f6", "#ef4444", "#f59e0b", "#10b981", "#8b5cf6", "#14b8a6", "#f97316", "#22c55e"]
+  const categoryData = Array.from(categoryMap.entries()).map(([name, value], i) => ({ name, value, color: palette[i % palette.length] }))
+
+  // Tren saldo: total saldo akun saat ini (flat). Tanpa dummy, tampilkan garis datar.
+  const { data: accounts } = useUserCollection<any>("accounts")
+  const totalBalance = accounts.reduce((sum, a) => sum + Number(a.balance || 0), 0)
+  const days = Array.from({ length: 5 }, (_, i) => i) // ringkas: 5 titik datar
+  const trendData = days.map((i) => ({ date: `${i + 1}`, balance: totalBalance }))
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -55,7 +86,7 @@ export function FinancialCharts() {
             }}
             className="w-full h-64 sm:h-80 aspect-auto overflow-hidden"
           >
-            <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <BarChart data={monthly} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
               <XAxis
                 dataKey="month"
                 fontSize={12}

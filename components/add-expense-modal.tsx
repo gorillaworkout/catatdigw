@@ -19,28 +19,20 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Calendar } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useUserCollection } from "@/hooks/use-firestore"
+import { useAuth } from "@/hooks/use-auth"
+import { addExpenseWithBalanceCheck } from "@/lib/firestore"
 
-const categories = [
-  "Makanan & Minuman",
-  "Transportasi",
-  "Belanja",
-  "Hiburan",
-  "Kesehatan",
-  "Pendidikan",
-  "Tagihan",
-  "Lainnya",
-]
-
-const accounts = [
-  { id: "bca", name: "BCA Tabungan" },
-  { id: "cash", name: "Cash" },
-  { id: "investment", name: "Investasi" },
-]
+type Category = { id: string; name: string }
+type Account = { id: string; name: string; balance?: number }
 
 export function AddExpenseModal() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
+  const { data: categories } = useUserCollection<Category>("categories")
+  const { data: accounts } = useUserCollection<Account>("accounts")
 
   const [formData, setFormData] = useState({
     amount: "",
@@ -54,29 +46,42 @@ export function AddExpenseModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    toast({
-      title: "Pengeluaran berhasil ditambahkan",
-      description: `${formData.description} sebesar ${new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-      }).format(Number(formData.amount))}`,
-    })
-
-    setFormData({
-      amount: "",
-      description: "",
-      category: "",
-      account: "",
-      date: new Date().toISOString().split("T")[0],
-      notes: "",
-    })
-    setLoading(false)
-    setOpen(false)
+    try {
+      if (!user) throw new Error("Harus login")
+      const category = categories.find((c) => c.id === formData.category)
+      const account = accounts.find((a) => a.id === formData.account)
+      await addExpenseWithBalanceCheck(user.uid, {
+        amount: Number(formData.amount),
+        description: formData.description,
+        categoryId: formData.category,
+        categoryName: category?.name,
+        accountId: formData.account,
+        accountName: account?.name,
+        date: formData.date,
+        notes: formData.notes,
+      })
+      toast({
+        title: "Pengeluaran berhasil ditambahkan",
+        description: `${formData.description} sebesar ${new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(Number(formData.amount))}`,
+      })
+      setFormData({
+        amount: "",
+        description: "",
+        category: "",
+        account: "",
+        date: new Date().toISOString().split("T")[0],
+        notes: "",
+      })
+      setOpen(false)
+    } catch (err: any) {
+      toast({ title: "Gagal menambahkan pengeluaran", description: err?.message || String(err) })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -153,8 +158,8 @@ export function AddExpenseModal() {
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="text-popover-foreground">
-                      {category}
+                    <SelectItem key={category.id} value={category.id} className="text-popover-foreground">
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
