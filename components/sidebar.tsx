@@ -26,8 +26,8 @@ const navigation = [
   { name: "Pendapatan", href: "/dashboard/income", icon: TrendingUp },
   { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
   { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
-  { name: "Bantuan & FAQ", href: "/dashboard/help", icon: HelpCircle },
-  { name: "FAQ", href: "/faq", icon: MessageSquare }, // Added dedicated FAQ page
+  // { name: "Bantuan", href: "/dashboard/help", icon: HelpCircle },
+  { name: "Bantuan & FAQ", href: "/dashboard/help", icon: MessageSquare }, // Redirected to help page
   { name: "Riwayat & Backup", href: "/dashboard/history", icon: History },
 ]
 

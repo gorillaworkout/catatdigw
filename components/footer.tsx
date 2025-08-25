@@ -58,9 +58,7 @@ export function Footer() {
             <h3 className="font-semibold text-card-foreground mb-4">Dukungan</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-card-foreground transition-colors">
-                  FAQ
-                </Link>
+                <Link href="/dashboard/help" className="text-muted-foreground hover:text-card-foreground transition-colors">FAQ</Link>
               </li>
               <li>
                 <Link href="/contact" className="text-muted-foreground hover:text-card-foreground transition-colors">

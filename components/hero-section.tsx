@@ -25,7 +25,7 @@ export function HeroSection() {
 
           <AnimatedDiv direction="left" delay={0.2}>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Kelola Keuangan Anda dengan <span className="text-primary">Mudah & Elegan</span>
+              Kelola Keuangan Anda dengan <span className="text-primary">Mudah & Rapih</span>
             </h1>
           </AnimatedDiv>
 
