@@ -3,35 +3,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts"
-
-// Mock data
-const monthlyIncome = [
-  { month: "Jan", amount: 7500000 },
-  { month: "Feb", amount: 8200000 },
-  { month: "Mar", amount: 7800000 },
-  { month: "Apr", amount: 9100000 },
-  { month: "May", amount: 8500000 },
-  { month: "Jun", amount: 8800000 },
-]
-
-const categoryBreakdown = [
-  { name: "Gaji", value: 8500000, color: "#3b82f6" },
-  { name: "Freelance", value: 2500000, color: "#8b5cf6" },
-  { name: "Bonus", value: 1200000, color: "#ec4899" },
-  { name: "Bisnis", value: 850000, color: "#10b981" },
-  { name: "Dividen", value: 450000, color: "#f59e0b" },
-]
-
-const dailyTrend = [
-  { date: "1", amount: 0 },
-  { date: "10", amount: 500000 },
-  { date: "15", amount: 1700000 },
-  { date: "20", amount: 2150000 },
-  { date: "25", amount: 4650000 },
-  { date: "28", amount: 13150000 },
-]
+import { useIncome } from "@/hooks/use-income"
 
 export function IncomeCharts() {
+  const { 
+    incomes, 
+    loading, 
+    getIncomeByCategory, 
+    getMonthlyIncomeData, 
+    getDailyIncomeTrend 
+  } = useIncome()
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -39,6 +21,57 @@ export function IncomeCharts() {
       minimumFractionDigits: 0,
     }).format(value)
   }
+
+  if (loading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+          <Card className="bg-card border-border overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="h-6 w-32 bg-muted animate-pulse rounded mb-2" />
+              <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+            </CardHeader>
+            <CardContent className="p-3 sm:p-6">
+              <div className="w-full h-56 sm:h-64 bg-muted animate-pulse rounded" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (incomes.length === 0) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <Card className="bg-card border-border">
+          <CardContent className="p-8 text-center">
+            <div className="text-muted-foreground">
+              <BarChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">Belum ada data untuk ditampilkan</p>
+              <p className="text-sm">Tambahkan pendapatan untuk melihat grafik dan analisis</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Get category breakdown with colors
+  const categoryData = getIncomeByCategory()
+  const categoryBreakdown = categoryData.map((item, index) => {
+    const colors = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#06b6d4", "#84cc16", "#f97316"]
+    return {
+      name: item.name,
+      value: item.value,
+      color: colors[index % colors.length]
+    }
+  })
+
+  // Get monthly data for the last 6 months
+  const monthlyIncome = getMonthlyIncomeData(6)
+
+  // Get daily trend for the last 30 days
+  const dailyTrend = getDailyIncomeTrend(30)
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -90,7 +123,59 @@ export function IncomeCharts() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Monthly Trend */}
+        <Card className="bg-card border-border overflow-hidden">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-card-foreground text-lg sm:text-xl">Trend Bulanan</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Pendapatan 6 bulan terakhir</CardDescription>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6">
+            <ChartContainer
+              config={{
+                value: {
+                  label: "Jumlah",
+                  color: "hsl(var(--chart-1))",
+                },
+              }}
+              className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
+            >
+              <BarChart data={monthlyIncome}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Bar dataKey="amount" fill="#3b82f6" />
+                <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Daily Trend */}
+      <Card className="bg-card border-border overflow-hidden">
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-card-foreground text-lg sm:text-xl">Trend Harian</CardTitle>
+          <CardDescription className="text-sm sm:text-base">Pendapatan 30 hari terakhir</CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 sm:p-6">
+          <ChartContainer
+            config={{
+              value: {
+                label: "Jumlah",
+                color: "hsl(var(--chart-1))",
+              },
+            }}
+            className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
+          >
+            <LineChart data={dailyTrend}>
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Line type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={2} />
+              <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -2,18 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Calendar, Target, PieChart } from "lucide-react"
-
-// Mock data
-const incomeData = {
-  thisMonth: 8500000,
-  lastMonth: 7800000,
-  thisYear: 85000000,
-  target: 10000000,
-  sources: 5,
-  transactions: 12,
-}
+import { useIncome } from "@/hooks/use-income"
 
 export function IncomeOverview() {
+  const { 
+    incomes, 
+    loading, 
+    getTotalIncome, 
+    getIncomesByMonth, 
+    getIncomesByYear 
+  } = useIncome()
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -22,13 +21,51 @@ export function IncomeOverview() {
     }).format(amount)
   }
 
-  const monthlyChange = ((incomeData.thisMonth - incomeData.lastMonth) / incomeData.lastMonth) * 100
-  const targetAchieved = (incomeData.thisMonth / incomeData.target) * 100
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card key={index} className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-20 bg-muted animate-pulse rounded mb-2" />
+              <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1
+  const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear
+
+  const thisMonthIncomes = getIncomesByMonth(currentYear, currentMonth)
+  const lastMonthIncomes = getIncomesByMonth(lastMonthYear, lastMonth)
+  const thisYearIncomes = getIncomesByYear(currentYear)
+
+  const thisMonthTotal = getTotalIncome(thisMonthIncomes)
+  const lastMonthTotal = getTotalIncome(lastMonthIncomes)
+  const thisYearTotal = getTotalIncome(thisYearIncomes)
+  
+  // Target is set to 10% more than last month's income, or 10M if no last month data
+  const target = lastMonthTotal > 0 ? lastMonthTotal * 1.1 : 10000000
+  const targetAchieved = target > 0 ? (thisMonthTotal / target) * 100 : 0
+  const monthlyChange = lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100 : 0
+
+  // Get unique categories for this month
+  const uniqueCategories = new Set(thisMonthIncomes.map(income => income.categoryName || 'Lainnya')).size
 
   const cards = [
     {
       title: "Pendapatan Bulan Ini",
-      value: formatCurrency(incomeData.thisMonth),
+      value: formatCurrency(thisMonthTotal),
       icon: TrendingUp,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
@@ -42,27 +79,27 @@ export function IncomeOverview() {
       icon: Target,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
-      change: formatCurrency(incomeData.target - incomeData.thisMonth),
+      change: formatCurrency(target - thisMonthTotal),
       changeType: "neutral" as const,
       description: "sisa target",
     },
     {
       title: "Pendapatan Tahun Ini",
-      value: formatCurrency(incomeData.thisYear),
+      value: formatCurrency(thisYearTotal),
       icon: Calendar,
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
-      change: `${incomeData.transactions} transaksi`,
+      change: `${thisYearIncomes.length} transaksi`,
       changeType: "neutral" as const,
       description: "total transaksi",
     },
     {
       title: "Sumber Pendapatan",
-      value: incomeData.sources.toString(),
+      value: uniqueCategories.toString(),
       icon: PieChart,
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
-      change: "5 sumber",
+      change: `${uniqueCategories} sumber`,
       changeType: "neutral" as const,
       description: "aktif bulan ini",
     },

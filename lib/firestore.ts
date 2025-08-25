@@ -511,3 +511,64 @@ export async function updateExpenseWithBalanceCheck(
 }
 
 
+// Transfer funds between two accounts (no expense/income recorded, just balance move)
+export type TransferInput = {
+  fromAccountId: string
+  toAccountId: string
+  amount: number
+  date: string // ISO yyyy-mm-dd
+  notes?: string
+}
+
+export async function transferFunds(userId: string, input: TransferInput) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+  if (!input.fromAccountId || !input.toAccountId) throw new Error("Rekening asal dan tujuan wajib dipilih")
+  if (input.fromAccountId === input.toAccountId) throw new Error("Rekening asal dan tujuan tidak boleh sama")
+  if (!input.date) throw new Error("Tanggal wajib dipilih")
+
+  const amount = Number(input.amount || 0)
+  if (amount <= 0) throw new Error("Jumlah pemindahan harus lebih dari 0")
+
+  const fromRef = doc(db as any, "users", userId, "accounts", input.fromAccountId)
+  const toRef = doc(db as any, "users", userId, "accounts", input.toAccountId)
+  const transfersCol = collection(db as any, "users", userId, "transfers")
+
+  await runTransaction(db as any, async (transaction: any) => {
+    const fromSnap = await transaction.get(fromRef)
+    const toSnap = await transaction.get(toRef)
+
+    if (!fromSnap.exists()) throw new Error("Rekening asal tidak ditemukan")
+    if (!toSnap.exists()) throw new Error("Rekening tujuan tidak ditemukan")
+
+    const fromData = fromSnap.data() as { balance?: number; name?: string }
+    const toData = toSnap.data() as { balance?: number; name?: string }
+
+    const fromBalance = Number(fromData.balance || 0)
+    const toBalance = Number(toData.balance || 0)
+
+    if (fromBalance < amount) {
+      const shortfall = amount - fromBalance
+      throw new Error(`Saldo rekening asal tidak mencukupi. Kekurangan: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(shortfall)}`)
+    }
+
+    // Update balances
+    transaction.update(fromRef, { balance: fromBalance - amount, updatedAt: serverTimestamp() })
+    transaction.update(toRef, { balance: toBalance + amount, updatedAt: serverTimestamp() })
+
+    // Record transfer document for history/audit
+    transaction.set(doc(transfersCol), {
+      fromAccountId: input.fromAccountId,
+      fromAccountName: fromData.name || null,
+      toAccountId: input.toAccountId,
+      toAccountName: toData.name || null,
+      amount,
+      date: input.date,
+      notes: input.notes || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    })
+  })
+}
+
+

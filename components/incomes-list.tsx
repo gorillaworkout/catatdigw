@@ -6,64 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Edit, Trash2, TrendingUp } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
-// Mock data
-const incomes = [
-  {
-    id: 1,
-    description: "Gaji Bulanan",
-    amount: 8500000,
-    category: "Gaji",
-    account: "BCA Tabungan",
-    date: "2024-06-28",
-    notes: "Gaji bulan Juni dari perusahaan",
-  },
-  {
-    id: 2,
-    description: "Freelance Web Development",
-    amount: 2500000,
-    category: "Freelance",
-    account: "BCA Tabungan",
-    date: "2024-06-25",
-    notes: "Project website untuk klien startup",
-  },
-  {
-    id: 3,
-    description: "Dividen Saham",
-    amount: 450000,
-    category: "Dividen",
-    account: "Investasi",
-    date: "2024-06-20",
-    notes: "Dividen dari portfolio saham",
-  },
-  {
-    id: 4,
-    description: "Bonus Kinerja",
-    amount: 1200000,
-    category: "Bonus",
-    account: "BCA Tabungan",
-    date: "2024-06-15",
-    notes: "Bonus kinerja Q2 2024",
-  },
-  {
-    id: 5,
-    description: "Penjualan Online",
-    amount: 850000,
-    category: "Bisnis",
-    account: "BCA Tabungan",
-    date: "2024-06-12",
-    notes: "Penjualan produk di marketplace",
-  },
-  {
-    id: 6,
-    description: "Hadiah Ulang Tahun",
-    amount: 500000,
-    category: "Hadiah",
-    account: "Cash",
-    date: "2024-06-10",
-    notes: "Hadiah uang dari keluarga",
-  },
-]
+import { useIncome } from "@/hooks/use-income"
 
 const categoryColors: Record<string, string> = {
   Gaji: "bg-blue-500/10 text-blue-500 border-blue-500/20",
@@ -77,6 +20,7 @@ const categoryColors: Record<string, string> = {
 }
 
 export function IncomesList() {
+  const { incomes, loading } = useIncome()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
   const totalPages = Math.ceil(incomes.length / itemsPerPage)
@@ -98,6 +42,56 @@ export function IncomesList() {
   }
 
   const paginatedIncomes = incomes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  if (loading) {
+    return (
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y divide-border">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
+                      <div className="flex-1 min-w-0">
+                        <div className="h-4 w-32 bg-muted animate-pulse rounded mb-2" />
+                        <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-6 w-20 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (incomes.length === 0) {
+    return (
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-card-foreground">Daftar Pendapatan</CardTitle>
+        </CardHeader>
+        <CardContent className="p-8 text-center">
+          <div className="text-muted-foreground">
+            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">Belum ada pendapatan</p>
+            <p className="text-sm">Tambahkan pendapatan pertama Anda untuk memulai</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="bg-card border-border">
@@ -122,12 +116,12 @@ export function IncomesList() {
                       <div className="flex items-center gap-2 mt-1">
                         <Badge
                           variant="outline"
-                          className={categoryColors[income.category] || categoryColors["Lainnya"]}
+                          className={categoryColors[income.categoryName || 'Lainnya'] || categoryColors["Lainnya"]}
                         >
-                          {income.category}
+                          {income.categoryName || 'Lainnya'}
                         </Badge>
                         <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{income.account}</span>
+                        <span className="text-sm text-muted-foreground">{income.accountName || 'Tidak diketahui'}</span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">{formatDate(income.date)}</span>
                       </div>

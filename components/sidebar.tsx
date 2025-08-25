@@ -12,6 +12,7 @@ import {
   HelpCircle,
   History,
   Wallet,
+  ArrowLeftRight,
   X,
   MessageSquare,
 } from "lucide-react"
@@ -24,6 +25,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Pengeluaran", href: "/dashboard/expenses", icon: TrendingDown },
   { name: "Pendapatan", href: "/dashboard/income", icon: TrendingUp },
+  { name: "Pindah Dana", href: "/dashboard/transfer", icon: ArrowLeftRight },
   { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
   { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
   // { name: "Bantuan", href: "/dashboard/help", icon: HelpCircle },

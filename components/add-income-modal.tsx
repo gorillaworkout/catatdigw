@@ -19,25 +19,24 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Calendar } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-
-const categories = ["Gaji", "Freelance", "Bisnis", "Investasi", "Dividen", "Bonus", "Hadiah", "Lainnya"]
-
-const accounts = [
-  { id: "bca", name: "BCA Tabungan" },
-  { id: "cash", name: "Cash" },
-  { id: "investment", name: "Investasi" },
-]
+import { useIncome } from "@/hooks/use-income"
+import { useAccounts } from "@/hooks/use-accounts"
+import { useUserCollection } from "@/hooks/use-firestore"
+import { parseIDR, formatIDR } from "@/lib/utils"
 
 export function AddIncomeModal() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { addIncome } = useIncome()
+  const { accounts } = useAccounts()
+  const { data: categories } = useUserCollection<any>("categories")
 
   const [formData, setFormData] = useState({
     amount: "",
     description: "",
-    category: "",
-    account: "",
+    categoryId: "",
+    accountId: "",
     date: new Date().toISOString().split("T")[0],
     notes: "",
   })
@@ -46,32 +45,65 @@ export function AddIncomeModal() {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const selectedCategory = categories.find((cat: any) => cat.id === formData.categoryId)
+      const selectedAccount = accounts.find((acc: any) => acc.id === formData.accountId)
+      const incomeAmount = parseIDR(formData.amount)
 
-    toast({
-      title: "Pendapatan berhasil ditambahkan",
-      description: `${formData.description} sebesar ${new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-      }).format(Number(formData.amount))}`,
-    })
+      if (incomeAmount <= 0) {
+        toast({
+          title: "Jumlah tidak valid",
+          description: "Jumlah pendapatan harus lebih dari 0",
+          variant: "destructive"
+        })
+        setLoading(false)
+        return
+      }
 
-    setFormData({
-      amount: "",
-      description: "",
-      category: "",
-      account: "",
-      date: new Date().toISOString().split("T")[0],
-      notes: "",
-    })
-    setLoading(false)
-    setOpen(false)
+      await addIncome({
+        amount: incomeAmount,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        categoryName: selectedCategory?.name,
+        accountId: formData.accountId,
+        accountName: selectedAccount?.name,
+        date: formData.date,
+        notes: formData.notes,
+      })
+
+      setFormData({
+        amount: "",
+        description: "",
+        categoryId: "",
+        accountId: "",
+        date: new Date().toISOString().split("T")[0],
+        notes: "",
+      })
+      setOpen(false)
+    } catch (error) {
+      console.error("Error adding income:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleAmountChange = (value: string) => {
+    // Use the parseIDR utility for consistent parsing
+    const numericValue = value.replace(/[^\d]/g, "")
+    
+    if (numericValue === "") {
+      setFormData(prev => ({ ...prev, amount: "" }))
+      return
+    }
+    
+    // Format as Indonesian Rupiah using the utility function
+    const formattedValue = formatIDR(numericValue)
+    
+    setFormData(prev => ({ ...prev, amount: formattedValue }))
   }
 
   return (
@@ -95,10 +127,10 @@ export function AddIncomeModal() {
               </Label>
               <Input
                 id="amount"
-                type="number"
-                placeholder="0"
+                type="text"
+                placeholder="Rp 0"
                 value={formData.amount}
-                onChange={(e) => handleInputChange("amount", e.target.value)}
+                onChange={(e) => handleAmountChange(e.target.value)}
                 required
                 className="bg-background border-border"
               />
@@ -138,14 +170,14 @@ export function AddIncomeModal() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-card-foreground">Kategori *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+              <Select value={formData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
                 <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category} className="text-popover-foreground">
-                      {category}
+                  {categories.map((category: any) => (
+                    <SelectItem key={category.id} value={category.id} className="text-popover-foreground">
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -153,12 +185,12 @@ export function AddIncomeModal() {
             </div>
             <div className="space-y-2">
               <Label className="text-card-foreground">Rekening *</Label>
-              <Select value={formData.account} onValueChange={(value) => handleInputChange("account", value)}>
+              <Select value={formData.accountId} onValueChange={(value) => handleInputChange("accountId", value)}>
                 <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Pilih rekening" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  {accounts.map((account) => (
+                  {accounts.map((account: any) => (
                     <SelectItem key={account.id} value={account.id} className="text-popover-foreground">
                       {account.name}
                     </SelectItem>
