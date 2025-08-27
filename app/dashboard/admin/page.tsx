@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { AdminSubscriptionManager } from "@/components/admin-subscription-manager"
+import { AdminDataCleanup } from "@/components/admin-data-cleanup"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 
 export const metadata = {
@@ -18,7 +19,10 @@ export default function AdminPage() {
         </div>
 
         <Suspense fallback={<DashboardSkeleton />}>
-          <AdminSubscriptionManager />
+          <div className="grid gap-6">
+            <AdminSubscriptionManager />
+            <AdminDataCleanup />
+          </div>
         </Suspense>
       </div>
     </DashboardLayout>

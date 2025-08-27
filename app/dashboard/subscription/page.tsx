@@ -27,10 +27,66 @@ export default function SubscriptionPage() {
         <Suspense fallback={<DashboardSkeleton />}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SubscriptionStatus />
-            <SubscriptionIntegrityChecker />
+            {/* <SubscriptionIntegrityChecker /> */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Kontak Pembayaran
+                </CardTitle>
+                <CardDescription>
+                  Hubungi kami untuk informasi pembayaran dan perpanjangan subscription
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">WhatsApp Support</h3>
+                      <Badge variant="default">Online</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Hubungi kami melalui WhatsApp untuk informasi pembayaran dan dukungan
+                    </p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-3 w-3 text-green-600" />
+                        Respon cepat dalam 1-2 jam
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-3 w-3 text-green-600" />
+                        Informasi paket dan harga
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-3 w-3 text-green-600" />
+                        Instruksi pembayaran
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-3 w-3 text-green-600" />
+                        Konfirmasi pembayaran
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-medium mb-3">Informasi Kontak</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      <span>WhatsApp: {config.whatsapp.displayNumber}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>Jam kerja: {config.whatsapp.businessHours}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -132,62 +188,7 @@ export default function SubscriptionPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  Kontak Pembayaran
-                </CardTitle>
-                <CardDescription>
-                  Hubungi kami untuk informasi pembayaran dan perpanjangan subscription
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">WhatsApp Support</h3>
-                      <Badge variant="default">Online</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Hubungi kami melalui WhatsApp untuk informasi pembayaran dan dukungan
-                    </p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-3 w-3 text-green-600" />
-                        Respon cepat dalam 1-2 jam
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-3 w-3 text-green-600" />
-                        Informasi paket dan harga
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-3 w-3 text-green-600" />
-                        Instruksi pembayaran
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-3 w-3 text-green-600" />
-                        Konfirmasi pembayaran
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium mb-3">Informasi Kontak</h4>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
-                      <span>WhatsApp: {config.whatsapp.displayNumber}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span>Jam kerja: {config.whatsapp.businessHours}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

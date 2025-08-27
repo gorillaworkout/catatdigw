@@ -3,51 +3,25 @@
 import { useSubscription } from "@/hooks/use-subscription"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar, Lock, AlertTriangle } from "lucide-react"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
+import { Lock, MessageCircle } from "lucide-react"
+import { config } from "@/lib/config"
 
 export function SubscriptionExpired() {
-  const { subscription, extendSubscription, getRemainingDays } = useSubscription()
-  const [isExtending, setIsExtending] = useState(false)
-  const [daysToAdd, setDaysToAdd] = useState("30")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const { toast } = useToast()
+  const { subscription, getRemainingDays } = useSubscription()
 
   const remainingDays = getRemainingDays()
 
-  const handleExtendSubscription = async () => {
-    if (!daysToAdd || parseInt(daysToAdd) <= 0) {
-      toast({
-        title: "Error",
-        description: "Jumlah hari harus lebih dari 0",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      setIsExtending(true)
-      await extendSubscription(parseInt(daysToAdd))
-      toast({
-        title: "Berhasil",
-        description: `Subscription diperpanjang ${daysToAdd} hari`,
-      })
-      setIsDialogOpen(false)
-      setDaysToAdd("30")
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Gagal memperpanjang subscription",
-        variant: "destructive",
-      })
-    } finally {
-      setIsExtending(false)
-    }
+  const handleContactWhatsApp = () => {
+    const message = encodeURIComponent(
+      `Halo! Saya ingin memperpanjang subscription saya.\n\n` +
+      `Detail subscription:\n` +
+      `- Status: ${subscription?.status || 'Unknown'}\n` +
+      `- Sisa hari: ${remainingDays} hari\n\n` +
+      `Mohon informasi paket dan cara pembayarannya. Terima kasih!`
+    )
+    
+    const whatsappUrl = `https://wa.me/${config.whatsapp.number}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
   return (
@@ -59,7 +33,7 @@ export function SubscriptionExpired() {
           </div>
           <CardTitle className="text-xl">Akses Terbatas</CardTitle>
           <CardDescription>
-            Subscription Anda telah berakhir. Perpanjang subscription untuk mengakses fitur lengkap.
+            Subscription Anda telah berakhir. Hubungi admin untuk memperpanjang subscription.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -105,44 +79,14 @@ export function SubscriptionExpired() {
             </div>
           </div>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <SubscriptionGuardButton className="w-full" size="lg" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
-                <Calendar className="h-4 w-4 mr-2" />
-                Perpanjang Subscription
-              </SubscriptionGuardButton>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Perpanjang Subscription</DialogTitle>
-                <DialogDescription>
-                  Masukkan jumlah hari untuk memperpanjang subscription Anda dan mengakses fitur lengkap.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="days">Jumlah Hari</Label>
-                  <Input
-                    id="days"
-                    type="number"
-                    min="1"
-                    value={daysToAdd}
-                    onChange={(e) => setDaysToAdd(e.target.value)}
-                    placeholder="30"
-                  />
-                </div>
-                <SubscriptionGuardButton 
-                  onClick={handleExtendSubscription} 
-                  disabled={isExtending}
-                  className="w-full"
-                  size="lg"
-                  tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
-                >
-                  {isExtending ? "Memproses..." : "Perpanjang Sekarang"}
-                </SubscriptionGuardButton>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            className="w-full" 
+            size="lg"
+            onClick={handleContactWhatsApp}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Hubungi Admin
+          </Button>
         </CardContent>
       </Card>
     </div>

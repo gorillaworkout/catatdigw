@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { type User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { auth, googleProvider, db } from "@/lib/firebase"
-import { ensureUserBootstrap, ensureUserDefaultsOnly } from "@/lib/firestore"
+import { ensureUserBootstrap, ensureUserDefaultsOnly, cleanupAllDuplicateData } from "@/lib/firestore"
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
 
 export function useAuth() {
@@ -47,7 +47,9 @@ export function useAuth() {
               { merge: true } as any
             )
             // Ensure accounts and categories exist without touching subscription
-            ensureUserDefaultsOnly(user.uid).catch(() => {})
+            await ensureUserDefaultsOnly(user.uid)
+            // Clean up any duplicate data that might exist
+            await cleanupAllDuplicateData(user.uid).catch(() => {})
           }
         }
       } catch (e) {

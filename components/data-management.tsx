@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { Download, Upload, Trash2, Database, Shield, AlertTriangle } from "lucide-react"
 import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
+import { DataCleanup } from "@/components/data-cleanup"
 
 export function DataManagement() {
   const { toast } = useToast()
@@ -61,6 +62,9 @@ export function DataManagement() {
 
   return (
     <div className="space-y-6">
+      {/* Data Cleanup */}
+      <DataCleanup />
+
       {/* Data Export */}
       <Card className="bg-card border-border">
         <CardHeader>

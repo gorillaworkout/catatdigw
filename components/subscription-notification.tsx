@@ -42,7 +42,7 @@ export function SubscriptionNotification({
       `Halo! Saya ingin memperpanjang subscription saya.\n\n` +
       `Detail subscription:\n` +
       `- Status: ${subscription?.status || 'Unknown'}\n` +
-      `- Sisa hari: ${remainingDays} hari\n` +
+      `- Sisa hari: ${remainingDays} hari\n\n` +
       `Mohon informasi paket dan cara pembayarannya. Terima kasih!`
     )
     

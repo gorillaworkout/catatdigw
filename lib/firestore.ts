@@ -211,24 +211,35 @@ export const DEFAULT_ACCOUNTS: Array<{ name: string; type: AccountInput["type"];
 export async function ensureUserDefaultAccounts(userId: string) {
   if (!db) throw new Error("Firestore belum terinisialisasi")
   const colRef = collection(db as any, "users", userId, "accounts")
-  const anySnap = await getDocs(query(colRef, limitFirestore(1)))
-  if (!anySnap.empty) return
+
+  // Get all existing accounts to check for duplicates
+  const existingSnap = await getDocs(colRef)
+  const existingNames = new Set(existingSnap.docs.map(d => d.data().name))
 
   const batch = writeBatch(db as any)
+  let hasChanges = false
+
+  // Only add accounts that don't already exist
   DEFAULT_ACCOUNTS.forEach((a) => {
-    const ref = doc(colRef)
-    batch.set(ref, {
-      name: a.name,
-      type: a.type,
-      balance: Number(a.balance || 0),
-      accountNumber: "",
-      description: "",
-      isActive: true,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    } as any)
+    if (!existingNames.has(a.name)) {
+      const ref = doc(colRef)
+      batch.set(ref, {
+        name: a.name,
+        type: a.type,
+        balance: Number(a.balance || 0),
+        accountNumber: "",
+        description: "",
+        isActive: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      } as any)
+      hasChanges = true
+    }
   })
-  await batch.commit()
+
+  if (hasChanges) {
+    await batch.commit()
+  }
 }
 
 // Default categories to seed for each user (expense and income)
@@ -356,6 +367,56 @@ export async function cleanupDuplicateCategories(userId: string) {
   
   await batch.commit()
   console.log(`Cleaned up ${duplicates.length} duplicate categories`)
+}
+
+// Clean up duplicate accounts (run this once if you have duplicates)
+export async function cleanupDuplicateAccounts(userId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  const colRef = collection(db as any, "users", userId, "accounts")
+  
+  const snap = await getDocs(colRef)
+  const accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  
+  // Group by name and find duplicates
+  const nameGroups = new Map<string, any[]>()
+  accounts.forEach((acc: any) => {
+    const name = acc.name
+    if (!nameGroups.has(name)) {
+      nameGroups.set(name, [])
+    }
+    nameGroups.get(name)!.push(acc)
+  })
+  
+  // Find accounts with duplicates
+  const duplicates = Array.from(nameGroups.entries())
+    .filter(([_, accs]) => accs.length > 1)
+    .flatMap(([_, accs]) => accs.slice(1)) // Keep first, remove rest
+  
+  if (duplicates.length === 0) return
+  
+  // Delete duplicates
+  const batch = writeBatch(db as any)
+  duplicates.forEach(acc => {
+    const ref = doc(colRef, acc.id)
+    batch.delete(ref)
+  })
+  
+  await batch.commit()
+  console.log(`Cleaned up ${duplicates.length} duplicate accounts`)
+}
+
+// Clean up all duplicate data (accounts and categories) - run this once if you have duplicates
+export async function cleanupAllDuplicateData(userId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  console.log(`Starting cleanup for user ${userId}...`)
+  
+  await Promise.all([
+    cleanupDuplicateAccounts(userId),
+    cleanupDuplicateCategories(userId)
+  ])
+  
+  console.log(`Cleanup completed for user ${userId}`)
 }
 
 // Get recent transactions (expenses and income combined)
@@ -850,39 +911,59 @@ export async function getAllUsersWithSubscriptions() {
   const usersCol = collection(db as any, "users")
   const usersSnap = await getDocs(usersCol)
   
+  console.log(`Found ${usersSnap.docs.length} user documents in Firestore`)
+  
   const usersWithSubscriptions = []
   
   for (const userDoc of usersSnap.docs) {
-    const userData = userDoc.data()
-    const userId = userDoc.id
+          const userData = userDoc.data()
+      const userId = userDoc.id
+      
+      console.log(`Processing user ${userId}:`, userData)
     
-    try {
-      const subscription = await getUserSubscription(userId)
-      usersWithSubscriptions.push({
-        userId,
-        email: userData.email || "",
-        displayName: userData.displayName || "",
-        photoURL: userData.photoURL || "",
-        createdAt: userData.createdAt,
-        subscription,
-        isActive: subscription ? subscription.isActive : false,
-        remainingDays: subscription ? Math.max(0, Math.ceil((subscription.endDate.toDate().getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) : 0
-      })
-    } catch (error) {
-      console.error(`Error getting subscription for user ${userId}:`, error)
-      usersWithSubscriptions.push({
-        userId,
-        email: userData.email || "",
-        displayName: userData.displayName || "",
-        photoURL: userData.photoURL || "",
-        createdAt: userData.createdAt,
-        subscription: null,
-        isActive: false,
-        remainingDays: 0
-      })
-    }
+          try {
+        const subscription = await getUserSubscription(userId)
+        console.log(`Subscription for ${userId}:`, subscription)
+              // Calculate remaining days if subscription exists
+        let remainingDays = 0
+        let isActive = false
+        
+        if (subscription && subscription.endDate) {
+          const endDate = subscription.endDate.toDate()
+          const now = new Date()
+          remainingDays = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+          isActive = subscription.isActive && now <= endDate
+        }
+        
+        usersWithSubscriptions.push({
+          userId,
+          email: userData.email || "",
+          displayName: userData.displayName || "",
+          photoURL: userData.photoURL || "",
+          role: userData.role || "user",
+          createdAt: userData.createdAt,
+          subscription,
+          isActive,
+          remainingDays
+        })
+          } catch (error) {
+        console.error(`Error getting subscription for user ${userId}:`, error)
+        // Add user even if subscription fetch fails
+        usersWithSubscriptions.push({
+          userId,
+          email: userData.email || "",
+          displayName: userData.displayName || "",
+          photoURL: userData.photoURL || "",
+          role: userData.role || "user",
+          createdAt: userData.createdAt,
+          subscription: null,
+          isActive: false,
+          remainingDays: 0
+        })
+      }
   }
   
+  console.log(`Loaded ${usersWithSubscriptions.length} users with subscriptions`)
   return usersWithSubscriptions
 }
 

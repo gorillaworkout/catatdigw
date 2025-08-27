@@ -23,8 +23,7 @@ export function SubscriptionBanner() {
       `Halo! Saya ingin memperpanjang subscription saya.\n\n` +
       `Detail subscription:\n` +
       `- Status: ${subscription?.status || 'Unknown'}\n` +
-      `- Sisa hari: ${remainingDays} hari\n` +
-      `- User ID: ${subscription?.userId || 'Unknown'}\n\n` +
+      `- Sisa hari: ${remainingDays} hari\n\n` +
       `Mohon informasi paket dan cara pembayarannya. Terima kasih!`
     )
     

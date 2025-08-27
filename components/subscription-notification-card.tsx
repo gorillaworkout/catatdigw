@@ -6,10 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, AlertTriangle, X, Clock, Lock, Crown } from "lucide-react"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { config } from "@/lib/config"
 
@@ -18,12 +14,8 @@ interface SubscriptionNotificationCardProps {
 }
 
 export function SubscriptionNotificationCard({ className }: SubscriptionNotificationCardProps) {
-  const { subscription, isActive, extendSubscription, getRemainingDays } = useSubscription()
-  const [isExtending, setIsExtending] = useState(false)
-  const [daysToAdd, setDaysToAdd] = useState("30")
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { subscription, isActive, getRemainingDays } = useSubscription()
   const [isDismissed, setIsDismissed] = useState(false)
-  const { toast } = useToast()
 
   const remainingDays = getRemainingDays()
 
@@ -37,8 +29,7 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
       `Halo! Saya ingin memperpanjang subscription saya.\n\n` +
       `Detail subscription:\n` +
       `- Status: ${subscription?.status || 'Unknown'}\n` +
-      `- Sisa hari: ${remainingDays} hari\n` +
-      `- User ID: ${subscription?.userId || 'Unknown'}\n\n` +
+      `- Sisa hari: ${remainingDays} hari\n\n` +
       `Mohon informasi paket dan cara pembayarannya. Terima kasih!`
     )
     
@@ -50,10 +41,10 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
     if (!isActive) {
       return {
         title: "Subscription Anda telah berakhir",
-        description: "Untuk mengakses fitur lengkap, silakan hubungi kami untuk pembayaran.",
+        description: "Untuk mengakses fitur lengkap, silakan hubungi admin untuk memperpanjang subscription.",
         variant: "destructive" as const,
         icon: Lock,
-        actionText: "Hubungi WhatsApp",
+        actionText: "Hubungi Admin",
         showWarning: true,
         bgGradient: "from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20",
         borderColor: "border-red-200 dark:border-red-800",
@@ -64,10 +55,10 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
     if (remainingDays === 0) {
       return {
         title: "Subscription berakhir hari ini",
-        description: "Subscription Anda akan berakhir hari ini. Hubungi kami untuk pembayaran.",
+        description: "Subscription Anda akan berakhir hari ini. Hubungi admin untuk memperpanjang subscription.",
         variant: "destructive" as const,
         icon: AlertTriangle,
-        actionText: "Hubungi WhatsApp",
+        actionText: "Hubungi Admin",
         showWarning: true,
         bgGradient: "from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20",
         borderColor: "border-orange-200 dark:border-orange-800",
@@ -78,10 +69,10 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
     if (remainingDays <= config.subscription.urgentWarningDays) {
       return {
         title: "Subscription akan berakhir segera",
-        description: `Subscription Anda akan berakhir dalam ${remainingDays} hari. Hubungi kami untuk pembayaran.`,
+        description: `Subscription Anda akan berakhir dalam ${remainingDays} hari. Hubungi admin untuk memperpanjang subscription.`,
         variant: "destructive" as const,
         icon: AlertTriangle,
-        actionText: "Hubungi WhatsApp",
+        actionText: "Hubungi Admin",
         showWarning: true,
         bgGradient: "from-yellow-50 to-yellow-100 dark:from-yellow-950/20 dark:to-yellow-900/20",
         borderColor: "border-yellow-200 dark:border-yellow-800",
@@ -91,10 +82,10 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
 
     return {
       title: "Subscription akan berakhir",
-      description: `Subscription Anda akan berakhir dalam ${remainingDays} hari. Hubungi kami untuk pembayaran.`,
+      description: `Subscription Anda akan berakhir dalam ${remainingDays} hari. Hubungi admin untuk memperpanjang subscription.`,
       variant: "default" as const,
       icon: Clock,
-      actionText: "Hubungi WhatsApp",
+      actionText: "Hubungi Admin",
       showWarning: false,
       bgGradient: "from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-900/20",
       borderColor: "border-blue-200 dark:border-blue-800",
@@ -106,15 +97,15 @@ export function SubscriptionNotificationCard({ className }: SubscriptionNotifica
   const IconComponent = content.icon
 
   return (
-            <Card className={cn(
-          "relative overflow-hidden border-2 shadow-lg",
-          content.borderColor,
-          content.bgGradient,
-          className
-        )}>
-          <div className="absolute inset-0 bg-gradient-to-r opacity-10"></div>
-          
-          <CardContent className="relative p-6 lg:p-8">
+    <Card className={cn(
+      "relative overflow-hidden border-2 shadow-lg",
+      content.borderColor,
+      content.bgGradient,
+      className
+    )}>
+      <div className="absolute inset-0 bg-gradient-to-r opacity-10"></div>
+      
+      <CardContent className="relative p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           {/* Content Section */}
           <div className="flex items-start gap-4 lg:gap-6 flex-1">
