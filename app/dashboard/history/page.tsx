@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { History, Download, Upload, Shield, Clock, Database, AlertCircle } from "lucide-react"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export const metadata: Metadata = {
   title: "Riwayat & Backup - catatdiGW",
@@ -60,14 +61,14 @@ export default function HistoryPage() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button>
+                <SubscriptionGuardButton tooltipText="Subscription berakhir. Perpanjang subscription untuk melakukan backup.">
                   <Upload className="mr-2 h-4 w-4" />
                   Backup Sekarang
-                </Button>
-                <Button variant="outline">
+                </SubscriptionGuardButton>
+                <SubscriptionGuardButton variant="outline" tooltipText="Subscription berakhir. Perpanjang subscription untuk restore data.">
                   <Download className="mr-2 h-4 w-4" />
                   Restore Data
-                </Button>
+                </SubscriptionGuardButton>
               </div>
             </CardContent>
           </Card>
@@ -128,9 +129,9 @@ export default function HistoryPage() {
                     <Badge variant="outline" className="text-green-600 border-green-600">
                       Berhasil
                     </Badge>
-                    <Button size="sm" variant="ghost">
+                    <SubscriptionGuardButton size="sm" variant="ghost" tooltipText="Subscription berakhir. Perpanjang subscription untuk mengunduh backup.">
                       <Download className="h-4 w-4" />
-                    </Button>
+                    </SubscriptionGuardButton>
                   </div>
                 </div>
               ))}

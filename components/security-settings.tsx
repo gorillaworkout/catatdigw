@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { Shield, Key, Smartphone, AlertTriangle } from "lucide-react"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export function SecuritySettings() {
   const { toast } = useToast()
@@ -123,9 +124,9 @@ export function SecuritySettings() {
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90">
+              <SubscriptionGuardButton type="submit" disabled={loading} className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
                 {loading ? "Mengubah..." : "Ubah Password"}
-              </Button>
+              </SubscriptionGuardButton>
             </div>
           </form>
         </CardContent>
@@ -161,9 +162,9 @@ export function SecuritySettings() {
               <p className="text-sm text-muted-foreground mb-3">
                 Scan QR code dengan aplikasi authenticator seperti Google Authenticator atau Authy
               </p>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
+              <SubscriptionGuardButton size="sm" className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
                 Setup 2FA
-              </Button>
+              </SubscriptionGuardButton>
             </div>
           )}
         </CardContent>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useIncome } from "@/hooks/use-income"
 import { useAccounts } from "@/hooks/use-accounts"
 import { useUserCollection } from "@/hooks/use-firestore"
+import { useSubscription } from "@/hooks/use-subscription"
 import { parseIDR, formatIDR } from "@/lib/utils"
 
 export function AddIncomeModal() {
@@ -30,6 +32,7 @@ export function AddIncomeModal() {
   const { toast } = useToast()
   const { addIncome } = useIncome()
   const { accounts } = useAccounts()
+  const { isActive: subscriptionActive } = useSubscription()
   const { data: categories } = useUserCollection<any>("categories")
 
   const [formData, setFormData] = useState({
@@ -43,6 +46,17 @@ export function AddIncomeModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check subscription status
+    if (!subscriptionActive) {
+      toast({ 
+        title: "Subscription Berakhir", 
+        description: "Subscription Anda telah berakhir. Silakan perpanjang subscription untuk menambah pendapatan.",
+        variant: "destructive"
+      })
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -109,10 +123,10 @@ export function AddIncomeModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
+        <SubscriptionGuardButton className="bg-green-600 hover:bg-green-700 text-white" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
           <Plus className="h-4 w-4 mr-2" />
           Tambah Pendapatan
-        </Button>
+        </SubscriptionGuardButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] bg-card border-border">
         <DialogHeader>
@@ -218,9 +232,9 @@ export function AddIncomeModal() {
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Batal
             </Button>
-            <Button type="submit" disabled={loading} className="bg-green-600 hover:bg-green-700 text-white">
+            <SubscriptionGuardButton type="submit" disabled={loading} className="bg-green-600 hover:bg-green-700 text-white">
               {loading ? "Menyimpan..." : "Simpan Pendapatan"}
-            </Button>
+            </SubscriptionGuardButton>
           </DialogFooter>
         </form>
       </DialogContent>

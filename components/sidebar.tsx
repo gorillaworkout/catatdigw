@@ -3,6 +3,8 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
+import { useSubscription } from "@/hooks/use-subscription"
+import { useRole } from "@/hooks/use-role"
 import {
   BarChart3,
   TrendingDown,
@@ -15,23 +17,17 @@ import {
   ArrowLeftRight,
   X,
   MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Calendar,
 } from "lucide-react"
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { AnimatedDiv } from "@/components/animated-div"
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { name: "Pengeluaran", href: "/dashboard/expenses", icon: TrendingDown },
-  { name: "Pendapatan", href: "/dashboard/income", icon: TrendingUp },
-  { name: "Pindah Dana", href: "/dashboard/transfer", icon: ArrowLeftRight },
-  { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
-  { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
-  // { name: "Bantuan", href: "/dashboard/help", icon: HelpCircle },
-  { name: "Bantuan & FAQ", href: "/dashboard/help", icon: MessageSquare }, // Redirected to help page
-  { name: "Riwayat & Backup", href: "/dashboard/history", icon: History },
-]
+
 
 interface SidebarProps {
   open: boolean
@@ -43,6 +39,22 @@ interface SidebarProps {
 export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: SidebarProps) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const { isActive, getRemainingDays, loading } = useSubscription()
+  const { isAdmin } = useRole()
+
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
+    { name: "Pengeluaran", href: "/dashboard/expenses", icon: TrendingDown },
+    { name: "Pendapatan", href: "/dashboard/income", icon: TrendingUp },
+    { name: "Pindah Dana", href: "/dashboard/transfer", icon: ArrowLeftRight },
+    { name: "Subscription", href: "/dashboard/subscription", icon: Calendar },
+    ...(isAdmin ? [{ name: "Admin", href: "/dashboard/admin", icon: Settings }] : []),
+    { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
+    { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
+    // { name: "Bantuan", href: "/dashboard/help", icon: HelpCircle },
+    { name: "Bantuan & FAQ", href: "/dashboard/help", icon: MessageSquare }, // Redirected to help page
+    { name: "Riwayat & Backup", href: "/dashboard/history", icon: History },
+  ]
 
   return (
     <>
@@ -119,6 +131,30 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
               )
             })}
           </nav>
+
+          {/* Subscription Status */}
+          {!loading && (
+            <div className="px-3 py-2 border-t border-sidebar-border">
+              <div className={cn(
+                "flex items-center gap-2 px-2 py-1.5 rounded-md text-xs",
+                collapsed && !open && "justify-center",
+                isActive 
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                  : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+              )}>
+                {isActive ? (
+                  <CheckCircle className="h-3 w-3" />
+                ) : (
+                  <AlertTriangle className="h-3 w-3" />
+                )}
+                {(!collapsed || open) && (
+                  <span className="font-medium">
+                    {isActive ? `${getRemainingDays()} hari` : "Berakhir"}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="p-3 border-t border-sidebar-border">
             <Button

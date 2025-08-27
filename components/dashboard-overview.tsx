@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, Wallet, PieChart, Plus } from "lucide-react"
 import { useUserCollection } from "@/hooks/use-firestore"
 import { AddAccountModal } from "@/components/add-account-modal"
+import { SubscriptionGuardButtonDashboard } from "@/components/subscription-guard-button-dashboard"
 
 export function DashboardOverview() {
   const { data: accounts } = useUserCollection<any>("accounts")
@@ -35,35 +36,20 @@ export function DashboardOverview() {
   ]
 
   return (
-    <div className="space-y-4">
-      {/* Quick Actions */}
-      <div className="flex justify-end">
-        <AddAccountModal 
-          onAccountUpdated={handleAccountUpdated}
-          title="Tambah Rekening Baru"
-          description="Tambahkan rekening baru untuk mengelola keuangan Anda"
-          trigger={
-            <div className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg cursor-pointer transition-colors">
-              <Plus className="h-4 w-4" />
-              <span className="text-sm font-medium">Tambah Rekening</span>
-            </div>
-          }
-        />
-      </div>
-
+    <div className="space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {cards.map((card, index) => (
-          <Card key={index} className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-card-foreground">{card.title}</CardTitle>
-              <div className={`p-1.5 sm:p-2 rounded-lg ${card.bgColor}`}>
-                <card.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${card.color}`} />
+          <Card key={index} className="bg-card border-border hover:shadow-md transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-6 pt-6">
+              <CardTitle className="text-sm font-medium text-card-foreground">{card.title}</CardTitle>
+              <div className={`p-2.5 rounded-xl ${card.bgColor}`}>
+                <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-card-foreground">{card.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="px-6 pb-6">
+              <div className="text-2xl lg:text-3xl font-bold text-card-foreground mb-2">{card.value}</div>
+              <p className="text-sm text-muted-foreground">
                 <span className={card.changeType === "positive" ? "text-green-500" : "text-red-500"}>{card.change}</span>{" "}
                 dari bulan lalu
               </p>

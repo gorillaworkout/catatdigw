@@ -6,6 +6,7 @@ import { Plus, CreditCard, Wallet, PiggyBank, Building2, Smartphone } from "luci
 import { useUserCollection } from "@/hooks/use-firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AddAccountModal } from "@/components/add-account-modal"
+import { SubscriptionGuardButtonDashboard } from "@/components/subscription-guard-button-dashboard"
 
 // Account type to icon mapping
 const getAccountIcon = (type: string) => {
@@ -50,10 +51,10 @@ export function AccountsList() {
               <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
               <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <Button size="sm" className="bg-primary hover:bg-primary/90 disabled:opacity-50 w-full sm:w-auto" disabled>
+            <SubscriptionGuardButtonDashboard size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Tambah
-            </Button>
+            </SubscriptionGuardButtonDashboard>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
@@ -83,7 +84,15 @@ export function AccountsList() {
               <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
               <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <AddAccountModal onAccountUpdated={handleAccountUpdated} />
+            <AddAccountModal 
+              onAccountUpdated={handleAccountUpdated}
+              trigger={
+                <SubscriptionGuardButtonDashboard size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah
+                </SubscriptionGuardButtonDashboard>
+              }
+            />
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
@@ -102,7 +111,15 @@ export function AccountsList() {
               <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
               <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
             </div>
-            <AddAccountModal onAccountUpdated={handleAccountUpdated} />
+            <AddAccountModal 
+              onAccountUpdated={handleAccountUpdated}
+              trigger={
+                <SubscriptionGuardButtonDashboard size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah
+                </SubscriptionGuardButtonDashboard>
+              }
+            />
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
@@ -115,32 +132,40 @@ export function AccountsList() {
   }
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Rekening</CardTitle>
-            <CardDescription className="text-sm sm:text-base">Kelola semua akun keuangan Anda</CardDescription>
+    <Card className="bg-card border-border hover:shadow-md transition-all duration-200">
+      <CardHeader className="px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="text-card-foreground text-xl font-semibold">Daftar Rekening</CardTitle>
+            <CardDescription className="text-base">Kelola semua akun keuangan Anda</CardDescription>
           </div>
-          <AddAccountModal onAccountUpdated={handleAccountUpdated} />
+          <AddAccountModal 
+            onAccountUpdated={handleAccountUpdated}
+            trigger={
+              <SubscriptionGuardButtonDashboard size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah
+              </SubscriptionGuardButtonDashboard>
+            }
+          />
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
+      <CardContent className="space-y-4 px-6">
         {accounts.map((account) => {
           const { icon: Icon, color } = getAccountIcon(account.type)
           return (
-            <div key={account.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-              <div className="flex items-center space-x-3">
-                <div className="bg-background p-2 rounded-lg flex-shrink-0">
-                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${color}`} />
+            <div key={account.id} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+              <div className="flex items-center space-x-4">
+                <div className="bg-background p-3 rounded-xl flex-shrink-0 shadow-sm">
+                  <Icon className={`h-5 w-5 ${color}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-card-foreground text-sm sm:text-base truncate">{account.name}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground capitalize truncate">{account.type}</p>
+                  <p className="font-semibold text-card-foreground text-base truncate">{account.name}</p>
+                  <p className="text-sm text-muted-foreground capitalize truncate">{account.type}</p>
                 </div>
               </div>
-              <div className="text-right flex-shrink-0 ml-2">
-                <p className="font-semibold text-card-foreground text-sm sm:text-base">{formatCurrency(account.balance || 0)}</p>
+              <div className="text-right flex-shrink-0 ml-4">
+                <p className="font-bold text-card-foreground text-lg">{formatCurrency(account.balance || 0)}</p>
               </div>
             </div>
           )

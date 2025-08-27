@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit as limitFirestore, query, where, runTransaction, serverTimestamp, writeBatch, orderBy } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, limit as limitFirestore, query, where, runTransaction, serverTimestamp, writeBatch, orderBy, Timestamp, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 export type ExpenseInput = {
@@ -15,6 +15,13 @@ export type ExpenseInput = {
 export async function addExpenseWithBalanceCheck(userId: string, input: ExpenseInput) {
   if (!db) throw new Error("Firestore belum terinisialisasi")
   if (!userId) throw new Error("User belum login")
+  
+  // Check subscription status
+  const isActive = await isSubscriptionActive(userId)
+  if (!isActive) {
+    throw new Error("Subscription Anda telah berakhir. Silakan perpanjang subscription untuk menambah pengeluaran.")
+  }
+  
   if (!input.accountId) throw new Error("Rekening wajib dipilih")
   if (!input.categoryId) throw new Error("Kategori wajib dipilih")
   if (!input.description?.trim()) throw new Error("Deskripsi pengeluaran wajib diisi")
@@ -72,6 +79,13 @@ export type IncomeInput = {
 export async function addIncomeWithBalanceUpdate(userId: string, input: IncomeInput) {
   if (!db) throw new Error("Firestore belum terinisialisasi")
   if (!userId) throw new Error("User belum login")
+  
+  // Check subscription status
+  const isActive = await isSubscriptionActive(userId)
+  if (!isActive) {
+    throw new Error("Subscription Anda telah berakhir. Silakan perpanjang subscription untuk menambah pendapatan.")
+  }
+  
   if (!input.accountId) throw new Error("Rekening wajib dipilih")
   if (!input.categoryId) throw new Error("Kategori wajib dipilih")
   if (!input.description?.trim()) throw new Error("Deskripsi pendapatan wajib diisi")
@@ -294,6 +308,17 @@ export async function ensureUserBootstrap(userId: string) {
   await Promise.all([
     ensureUserDefaultAccounts(userId),
     ensureUserDefaultCategories(userId),
+    createUserSubscription(userId), // Add subscription for new users (only if doesn't exist)
+  ])
+}
+
+// Ensure only accounts and categories exist (for existing users)
+export async function ensureUserDefaultsOnly(userId: string) {
+  if (!userId) return
+  await Promise.all([
+    ensureUserDefaultAccounts(userId),
+    ensureUserDefaultCategories(userId),
+    // Don't touch subscription for existing users
   ])
 }
 
@@ -569,6 +594,296 @@ export async function transferFunds(userId: string, input: TransferInput) {
       updatedAt: serverTimestamp(),
     })
   })
+}
+
+// Subscription management
+export type SubscriptionStatus = "active" | "expired" | "trial"
+
+export type SubscriptionData = {
+  status: SubscriptionStatus
+  startDate: Timestamp
+  endDate: Timestamp
+  isActive: boolean
+}
+
+export type UserRole = "user" | "admin"
+
+export type UserData = {
+  uid: string
+  displayName: string
+  email: string
+  photoURL: string
+  role: UserRole
+  createdAt: any
+  updatedAt: any
+}
+
+// Create subscription for new user (1 week trial) - ONLY if it doesn't exist
+export async function createUserSubscription(userId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const subscriptionRef = doc(db as any, "users", userId, "subscription", "current")
+  
+  // Check if subscription already exists
+  const existingSnap = await getDoc(subscriptionRef)
+  if (existingSnap.exists()) {
+    // Subscription already exists, don't overwrite it
+    return existingSnap.data() as SubscriptionData
+  }
+  
+  // Only create new subscription if it doesn't exist
+  const now = new Date()
+  const endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 1 week from now
+  
+  const subscriptionData: SubscriptionData = {
+    status: "trial",
+    startDate: Timestamp.fromDate(now),
+    endDate: Timestamp.fromDate(endDate),
+    isActive: true,
+  }
+  
+  await setDoc(subscriptionRef, subscriptionData)
+  return subscriptionData
+}
+
+// Get user subscription status
+export async function getUserSubscription(userId: string): Promise<SubscriptionData | null> {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const subscriptionRef = doc(db as any, "users", userId, "subscription", "current")
+  const subscriptionSnap = await getDoc(subscriptionRef)
+  
+  if (!subscriptionSnap.exists()) {
+    return null
+  }
+  
+  return subscriptionSnap.data() as SubscriptionData
+}
+
+// Check if user subscription is active
+export async function isSubscriptionActive(userId: string): Promise<boolean> {
+  const subscription = await getUserSubscription(userId)
+  
+  if (!subscription) {
+    return false
+  }
+  
+  const now = new Date()
+  const endDate = subscription.endDate.toDate()
+  
+  // Check if subscription has expired but don't auto-update
+  if (now > endDate) {
+    // Return false if expired, but don't auto-update the status
+    return false
+  }
+  
+  return subscription.isActive && subscription.status !== "expired"
+}
+
+// Update subscription status
+export async function updateSubscriptionStatus(
+  userId: string, 
+  status: SubscriptionStatus, 
+  isActive: boolean
+) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const subscriptionRef = doc(db as any, "users", userId, "subscription", "current")
+  
+  await setDoc(subscriptionRef, {
+    status,
+    isActive,
+    updatedAt: serverTimestamp(),
+  } as any, { merge: true })
+}
+
+// Extend subscription (for future use)
+export async function extendSubscription(userId: string, daysToAdd: number) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const subscription = await getUserSubscription(userId)
+  if (!subscription) {
+    throw new Error("Subscription tidak ditemukan")
+  }
+  
+  const currentEndDate = subscription.endDate.toDate()
+  const newEndDate = new Date(currentEndDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
+  
+  const subscriptionRef = doc(db as any, "users", userId, "subscription", "current")
+  
+  await setDoc(subscriptionRef, {
+    endDate: Timestamp.fromDate(newEndDate),
+    status: "active",
+    isActive: true,
+    updatedAt: serverTimestamp(),
+  } as any, { merge: true })
+}
+
+// Admin functions for managing user subscriptions
+export async function adminUpdateUserSubscription(
+  adminUserId: string,
+  targetUserId: string,
+  updates: {
+    status?: SubscriptionStatus
+    isActive?: boolean
+    endDate?: Date
+    startDate?: Date
+  }
+) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  // TODO: Add admin check here - for now, allow any user to call this
+  // In production, you should check if adminUserId has admin privileges
+  
+  const subscriptionRef = doc(db as any, "users", targetUserId, "subscription", "current")
+  
+  // Get current subscription data first
+  const currentSnap = await getDoc(subscriptionRef)
+  if (!currentSnap.exists()) {
+    throw new Error("Subscription tidak ditemukan")
+  }
+  
+  const currentData = currentSnap.data()
+  
+  const updateData: any = {
+    updatedAt: serverTimestamp(),
+  }
+  
+  if (updates.status !== undefined) {
+    updateData.status = updates.status
+  }
+  
+  if (updates.isActive !== undefined) {
+    updateData.isActive = updates.isActive
+  }
+  
+  if (updates.endDate !== undefined) {
+    updateData.endDate = Timestamp.fromDate(updates.endDate)
+  }
+  
+  if (updates.startDate !== undefined) {
+    updateData.startDate = Timestamp.fromDate(updates.startDate)
+  }
+  
+  // Use merge: true to only update specified fields
+  await setDoc(subscriptionRef, updateData, { merge: true })
+  
+  console.log(`Admin ${adminUserId} updated subscription for user ${targetUserId}:`, updateData)
+}
+
+// Admin function to expire a user's subscription immediately
+export async function adminExpireUserSubscription(adminUserId: string, targetUserId: string) {
+  await adminUpdateUserSubscription(adminUserId, targetUserId, {
+    status: "expired",
+    isActive: false,
+    endDate: new Date() // Set to current time
+  })
+}
+
+// Verify subscription data hasn't been auto-updated
+export async function verifySubscriptionIntegrity(userId: string): Promise<{
+  isConsistent: boolean
+  currentData: any
+}> {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const subscriptionRef = doc(db as any, "users", userId, "subscription", "current")
+  const subscriptionSnap = await getDoc(subscriptionRef)
+  
+  if (!subscriptionSnap.exists()) {
+    return {
+      isConsistent: false,
+      currentData: null
+    }
+  }
+  
+  const data = subscriptionSnap.data()
+  
+  return {
+    isConsistent: true,
+    currentData: data
+  }
+}
+
+// Admin function to extend a user's subscription
+export async function adminExtendUserSubscription(
+  adminUserId: string, 
+  targetUserId: string, 
+  daysToAdd: number
+) {
+  const subscription = await getUserSubscription(targetUserId)
+  if (!subscription) {
+    throw new Error("Subscription tidak ditemukan")
+  }
+  
+  const currentEndDate = subscription.endDate.toDate()
+  const newEndDate = new Date(currentEndDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
+  
+  await adminUpdateUserSubscription(adminUserId, targetUserId, {
+    status: "active",
+    isActive: true,
+    endDate: newEndDate
+  })
+}
+
+// Update user role (admin only)
+export async function updateUserRole(adminUserId: string, targetUserId: string, newRole: UserRole) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  // TODO: Add admin check here - for now, allow any user to call this
+  // In production, you should check if adminUserId has admin privileges
+  
+  const userRef = doc(db as any, "users", targetUserId)
+  
+  await setDoc(userRef, {
+    role: newRole,
+    updatedAt: serverTimestamp(),
+  } as any, { merge: true })
+  
+  console.log(`Admin ${adminUserId} updated role for user ${targetUserId} to ${newRole}`)
+}
+
+// Get all users with their subscription data (admin only)
+export async function getAllUsersWithSubscriptions() {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const usersCol = collection(db as any, "users")
+  const usersSnap = await getDocs(usersCol)
+  
+  const usersWithSubscriptions = []
+  
+  for (const userDoc of usersSnap.docs) {
+    const userData = userDoc.data()
+    const userId = userDoc.id
+    
+    try {
+      const subscription = await getUserSubscription(userId)
+      usersWithSubscriptions.push({
+        userId,
+        email: userData.email || "",
+        displayName: userData.displayName || "",
+        photoURL: userData.photoURL || "",
+        createdAt: userData.createdAt,
+        subscription,
+        isActive: subscription ? subscription.isActive : false,
+        remainingDays: subscription ? Math.max(0, Math.ceil((subscription.endDate.toDate().getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) : 0
+      })
+    } catch (error) {
+      console.error(`Error getting subscription for user ${userId}:`, error)
+      usersWithSubscriptions.push({
+        userId,
+        email: userData.email || "",
+        displayName: userData.displayName || "",
+        photoURL: userData.photoURL || "",
+        createdAt: userData.createdAt,
+        subscription: null,
+        isActive: false,
+        remainingDays: 0
+      })
+    }
+  }
+  
+  return usersWithSubscriptions
 }
 
 

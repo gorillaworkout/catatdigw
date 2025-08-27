@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { useUserCollection } from "@/hooks/use-firestore"
 import { createCategory, deleteCategory as deleteCategoryFs, updateCategory as updateCategoryFs } from "@/lib/firestore"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 type Category = { id: string; name: string; color: string; type: "expense" | "income"; isDefault?: boolean }
 
@@ -118,14 +119,28 @@ export function CategoryManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border">
-              <DropdownMenuItem onClick={() => handleEdit(category)} className="text-popover-foreground">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
+              <DropdownMenuItem className="text-popover-foreground" asChild>
+                <SubscriptionGuardButton 
+                  variant="ghost" 
+                  className="w-full justify-start h-auto p-2 text-popover-foreground hover:bg-accent"
+                  onClick={() => handleEdit(category)}
+                  tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </SubscriptionGuardButton>
               </DropdownMenuItem>
               {!category.isDefault && (
-                <DropdownMenuItem onClick={() => handleDelete(category.id)} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus
+                <DropdownMenuItem className="text-destructive" asChild>
+                  <SubscriptionGuardButton 
+                    variant="ghost" 
+                    className="w-full justify-start h-auto p-2 text-destructive hover:bg-accent"
+                    onClick={() => handleDelete(category.id)}
+                    tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Hapus
+                  </SubscriptionGuardButton>
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -146,16 +161,17 @@ export function CategoryManagement() {
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button
+                <SubscriptionGuardButton
                   className="bg-primary hover:bg-primary/90"
                   onClick={() => {
                     setEditingCategory(null)
                     setFormData({ name: "", color: colorOptions[0] })
                   }}
+                  tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Tambah Kategori
-                </Button>
+                </SubscriptionGuardButton>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[400px] bg-card border-border">
                 <DialogHeader>
@@ -202,9 +218,9 @@ export function CategoryManagement() {
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Batal
                     </Button>
-                    <Button type="submit" className="bg-primary hover:bg-primary/90">
+                    <SubscriptionGuardButton type="submit" className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
                       {editingCategory ? "Perbarui" : "Tambah"} Kategori
-                    </Button>
+                    </SubscriptionGuardButton>
                   </DialogFooter>
                 </form>
               </DialogContent>

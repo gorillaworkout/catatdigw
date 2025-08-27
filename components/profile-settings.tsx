@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { Camera, Save } from "lucide-react"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export function ProfileSettings() {
   const { user } = useAuth()
@@ -160,10 +161,10 @@ export function ProfileSettings() {
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90">
+              <SubscriptionGuardButton type="submit" disabled={loading} className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? "Menyimpan..." : "Simpan Perubahan"}
-              </Button>
+              </SubscriptionGuardButton>
             </div>
           </form>
         </CardContent>

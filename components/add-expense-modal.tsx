@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import { Plus, Calendar, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useUserCollection } from "@/hooks/use-firestore"
 import { useAuth } from "@/hooks/use-auth"
+import { useSubscription } from "@/hooks/use-subscription"
 import { addExpenseWithBalanceCheck } from "@/lib/firestore"
 import { parseIDR, formatIDR } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -34,6 +36,7 @@ export function AddExpenseModal() {
   const [showConfirmation, setShowConfirmation] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
+  const { isActive: subscriptionActive } = useSubscription()
   const { data: allCategories } = useUserCollection<Category>("categories")
   const { data: accounts } = useUserCollection<Account>("accounts")
   
@@ -75,6 +78,16 @@ export function AddExpenseModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check subscription status
+    if (!subscriptionActive) {
+      toast({ 
+        title: "Subscription Berakhir", 
+        description: "Subscription Anda telah berakhir. Silakan perpanjang subscription untuk menambah pengeluaran.",
+        variant: "destructive"
+      })
+      return
+    }
     
     // Check if amount is valid
     if (expenseAmount <= 0) {
@@ -220,10 +233,10 @@ export function AddExpenseModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <SubscriptionGuardButton className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
           <Plus className="h-4 w-4 mr-2" />
           Tambah Pengeluaran
-        </Button>
+        </SubscriptionGuardButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] bg-card border-border">
         <DialogHeader>
@@ -393,13 +406,13 @@ export function AddExpenseModal() {
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Batal
             </Button>
-            <Button 
+            <SubscriptionGuardButton 
               type="submit" 
               disabled={loading || hasInsufficientFunds || expenseAmount <= 0} 
               className="bg-primary hover:bg-primary/90"
             >
               {loading ? "Menyimpan..." : "Simpan Pengeluaran"}
-            </Button>
+            </SubscriptionGuardButton>
           </DialogFooter>
         </form>
       </DialogContent>

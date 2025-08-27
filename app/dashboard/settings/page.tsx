@@ -2,6 +2,8 @@ import { Suspense } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { SettingsTabs } from "@/components/settings-tabs"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
+import { SubscriptionGuard } from "@/components/subscription-guard"
+import { SubscriptionNotification } from "@/components/subscription-notification"
 
 export const metadata = {
   title: "Pengaturan - catatdiGW",
@@ -18,7 +20,10 @@ export default function SettingsPage() {
         </div>
 
         <Suspense fallback={<DashboardSkeleton />}>
-          <SettingsTabs />
+          <SubscriptionNotification variant="compact" />
+          <SubscriptionGuard showNotification={false}>
+            <SettingsTabs />
+          </SubscriptionGuard>
         </Suspense>
       </div>
     </DashboardLayout>

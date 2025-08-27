@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { deleteExpenseWithBalanceRestore } from "@/lib/firestore"
 import { EditExpenseModal } from "@/components/edit-expense-modal"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,16 +174,30 @@ export function ExpensesList() {
                         <DropdownMenuItem 
                           className="text-popover-foreground"
                           onClick={() => handleEditClick(expense)}
+                          asChild
                         >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          <SubscriptionGuardButton 
+                            variant="ghost" 
+                            className="w-full justify-start h-auto p-2 text-popover-foreground hover:bg-accent"
+                            tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </SubscriptionGuardButton>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-destructive"
                           onClick={() => handleDeleteClick(expense)}
+                          asChild
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Hapus
+                          <SubscriptionGuardButton 
+                            variant="ghost" 
+                            className="w-full justify-start h-auto p-2 text-destructive hover:bg-accent"
+                            tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Hapus
+                          </SubscriptionGuardButton>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -250,13 +265,14 @@ export function ExpensesList() {
             <AlertDialogCancel disabled={deleting} className="bg-background border-border w-full sm:w-auto">
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <SubscriptionGuardButton 
               disabled={deleting} 
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
+              tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
             >
               {deleting ? "Menghapus..." : "Hapus"}
-            </AlertDialogAction>
+            </SubscriptionGuardButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

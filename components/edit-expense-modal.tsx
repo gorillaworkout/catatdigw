@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { updateExpenseWithBalanceCheck } from "@/lib/firestore"
 import { parseIDR, formatIDR } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type Category = { id: string; name: string; type: "expense" | "income" }
@@ -389,13 +390,14 @@ export function EditExpenseModal({ expense, onExpenseUpdated, onClose }: EditExp
               <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
                 Batal
               </Button>
-              <Button 
+              <SubscriptionGuardButton 
                 type="submit" 
                 disabled={loading || hasInsufficientFunds || expenseAmount <= 0 || !hasChanges} 
                 className="bg-primary hover:bg-primary/90"
+                tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
               >
                 {loading ? "Memperbarui..." : "Perbarui Pengeluaran"}
-              </Button>
+              </SubscriptionGuardButton>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -432,13 +434,14 @@ export function EditExpenseModal({ expense, onExpenseUpdated, onClose }: EditExp
             <AlertDialogCancel disabled={loading} onClick={handleClose} className="bg-background border-border">
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <SubscriptionGuardButton 
               onClick={performUpdate}
               disabled={loading}
               className="bg-primary hover:bg-primary/90"
+              tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
             >
               {loading ? "Memperbarui..." : "Konfirmasi & Perbarui"}
-            </AlertDialogAction>
+            </SubscriptionGuardButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

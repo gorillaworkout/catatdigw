@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Save } from "lucide-react"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export function AppPreferences() {
   const { toast } = useToast()
@@ -275,10 +276,10 @@ export function AppPreferences() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90">
+          <SubscriptionGuardButton type="submit" disabled={loading} className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
             <Save className="h-4 w-4 mr-2" />
             {loading ? "Menyimpan..." : "Simpan Preferensi"}
-          </Button>
+          </SubscriptionGuardButton>
         </div>
       </form>
     </div>

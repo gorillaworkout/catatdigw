@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { useAccounts, type Account as AccountType } from "@/hooks/use-accounts"
 import { formatIDR, parseIDR } from "@/lib/utils"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 const accountTypes = [
   { value: "bank", label: "Bank Account", icon: Building },
@@ -239,10 +240,10 @@ export function AddAccountModal({
     }}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button size="sm" className="bg-primary hover:bg-primary/90">
+          <SubscriptionGuardButton size="sm" className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
             <Plus className="h-4 w-4 mr-2" />
             {isEditing ? "Edit" : "Tambah"}
-          </Button>
+          </SubscriptionGuardButton>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] bg-card border-border z-[9999]">
@@ -334,9 +335,9 @@ export function AddAccountModal({
             <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
               Batal
             </Button>
-            <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90">
+            <SubscriptionGuardButton type="submit" disabled={loading} className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
               {submitButtonText}
-            </Button>
+            </SubscriptionGuardButton>
           </DialogFooter>
         </form>
       </DialogContent>

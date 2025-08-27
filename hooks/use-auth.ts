@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { type User, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth"
 import { auth, googleProvider, db } from "@/lib/firebase"
-import { ensureUserBootstrap } from "@/lib/firestore"
+import { ensureUserBootstrap, ensureUserDefaultsOnly } from "@/lib/firestore"
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
 
 export function useAuth() {
@@ -33,6 +33,7 @@ export function useAuth() {
               displayName: user.displayName || "",
               email: user.email || "",
               photoURL: user.photoURL || "",
+              role: "user", // Default role for new users
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             } as any)
@@ -45,8 +46,8 @@ export function useAuth() {
               { updatedAt: serverTimestamp() } as any,
               { merge: true } as any
             )
-            // Attempt to ensure defaults exist even if user doc already present
-            ensureUserBootstrap(user.uid).catch(() => {})
+            // Ensure accounts and categories exist without touching subscription
+            ensureUserDefaultsOnly(user.uid).catch(() => {})
           }
         }
       } catch (e) {

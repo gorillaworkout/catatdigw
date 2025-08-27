@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Edit, Trash2, TrendingUp } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useIncome } from "@/hooks/use-income"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 const categoryColors: Record<string, string> = {
   Gaji: "bg-blue-500/10 text-blue-500 border-blue-500/20",
@@ -142,13 +143,25 @@ export function IncomesList() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-popover border-border">
-                      <DropdownMenuItem className="text-popover-foreground">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                      <DropdownMenuItem className="text-popover-foreground" asChild>
+                        <SubscriptionGuardButton 
+                          variant="ghost" 
+                          className="w-full justify-start h-auto p-2 text-popover-foreground hover:bg-accent"
+                          tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </SubscriptionGuardButton>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Hapus
+                      <DropdownMenuItem className="text-destructive" asChild>
+                        <SubscriptionGuardButton 
+                          variant="ghost" 
+                          className="w-full justify-start h-auto p-2 text-destructive hover:bg-accent"
+                          tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran."
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Hapus
+                        </SubscriptionGuardButton>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

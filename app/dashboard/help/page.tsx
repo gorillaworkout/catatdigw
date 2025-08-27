@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MessageCircle, Book, Video, Mail, Phone, Home, Settings, HelpCircle, Plus, Edit, Trash2, TrendingUp, PieChart, Wallet, CreditCard } from "lucide-react"
 import Link from "next/link"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export const metadata: Metadata = {
   title: "Bantuan & FAQ - catatdiGW",
@@ -265,18 +266,18 @@ export default function HelpPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button>
+              <SubscriptionGuardButton tooltipText="Subscription berakhir. Perpanjang subscription untuk akses live chat.">
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Live Chat
-              </Button>
-              <Button variant="outline">
+              </SubscriptionGuardButton>
+              <SubscriptionGuardButton variant="outline" tooltipText="Subscription berakhir. Perpanjang subscription untuk akses email support.">
                 <Mail className="mr-2 h-4 w-4" />
                 Email Support
-              </Button>
-              <Button variant="outline">
+              </SubscriptionGuardButton>
+              <SubscriptionGuardButton variant="outline" tooltipText="Subscription berakhir. Perpanjang subscription untuk akses telepon support.">
                 <Phone className="mr-2 h-4 w-4" />
                 Telepon
-              </Button>
+              </SubscriptionGuardButton>
             </div>
           </CardContent>
         </Card>

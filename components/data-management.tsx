@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { Download, Upload, Trash2, Database, Shield, AlertTriangle } from "lucide-react"
+import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
 export function DataManagement() {
   const { toast } = useToast()
@@ -96,13 +97,13 @@ export function DataManagement() {
           )}
 
           <div className="flex gap-2">
-            <Button onClick={handleExportData} disabled={loading} className="bg-primary hover:bg-primary/90">
+            <SubscriptionGuardButton onClick={handleExportData} disabled={loading} className="bg-primary hover:bg-primary/90" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
               <Download className="h-4 w-4 mr-2" />
               {loading ? "Mengekspor..." : "Export ke JSON"}
-            </Button>
-            <Button variant="outline" onClick={handleExportData} disabled={loading}>
+            </SubscriptionGuardButton>
+            <SubscriptionGuardButton variant="outline" onClick={handleExportData} disabled={loading} tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
               Export ke CSV
-            </Button>
+            </SubscriptionGuardButton>
           </div>
         </CardContent>
       </Card>
@@ -129,10 +130,10 @@ export function DataManagement() {
             </ul>
           </div>
 
-          <Button onClick={handleImportData} variant="outline" className="w-full bg-transparent">
+          <SubscriptionGuardButton onClick={handleImportData} variant="outline" className="w-full bg-transparent" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
             <Upload className="h-4 w-4 mr-2" />
             Pilih File untuk Import
-          </Button>
+          </SubscriptionGuardButton>
         </CardContent>
       </Card>
 
@@ -173,9 +174,9 @@ export function DataManagement() {
             </div>
           </div>
 
-          <Button variant="outline" className="w-full bg-transparent">
+          <SubscriptionGuardButton variant="outline" className="w-full bg-transparent" tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
             Bersihkan Cache
-          </Button>
+          </SubscriptionGuardButton>
         </CardContent>
       </Card>
 
@@ -195,10 +196,10 @@ export function DataManagement() {
               Tindakan ini akan menghapus semua transaksi, rekening, dan pengaturan Anda secara permanen. Data yang
               dihapus tidak dapat dikembalikan.
             </p>
-            <Button variant="destructive" onClick={handleDeleteAllData}>
+            <SubscriptionGuardButton variant="destructive" onClick={handleDeleteAllData} tooltipText="Subscription berakhir. Hubungi WhatsApp untuk pembayaran.">
               <Trash2 className="h-4 w-4 mr-2" />
               Hapus Semua Data
-            </Button>
+            </SubscriptionGuardButton>
           </div>
         </CardContent>
       </Card>
