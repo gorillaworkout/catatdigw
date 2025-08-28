@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingDown, Calendar, Target, PieChart } from "lucide-react"
+import { TrendingDown, Calendar, Target, PieChart, CreditCard } from "lucide-react"
 import { orderBy, where } from "firebase/firestore"
 import { useThisMonthRange, useUserCollection } from "@/hooks/use-firestore"
 
@@ -36,6 +36,12 @@ export function ExpenseOverview() {
   expensesThisMonth.forEach((e) => categoriesUsed.add(e.categoryId || e.categoryName || "-"))
   const activeCategories = categoriesUsed.has("-") ? categoriesUsed.size - 1 : categoriesUsed.size
 
+  // Calculate installment payments
+  const installmentPaymentsThisMonth = expensesThisMonth.filter((e: any) => e.installmentPaymentId)
+  const installmentAmountThisMonth = installmentPaymentsThisMonth.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+  const installmentPaymentsThisYear = expensesThisYear.filter((e: any) => e.installmentPaymentId)
+  const installmentAmountThisYear = installmentPaymentsThisYear.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+
   const budget = 0 // default 0 jika belum ada fitur budget
   const transactions = expensesThisMonth.length
   const formatCurrency = (amount: number) => {
@@ -61,14 +67,14 @@ export function ExpenseOverview() {
       description: "dari bulan lalu",
     },
     {
-      title: "Budget Terpakai",
-      value: `${budgetUsed.toFixed(1)}%`,
-      icon: Target,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-      change: formatCurrency(Math.max(0, budget - thisMonth)),
+      title: "Pembayaran Cicilan",
+      value: formatCurrency(installmentAmountThisMonth),
+      icon: CreditCard,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      change: `${installmentPaymentsThisMonth.length} pembayaran`,
       changeType: "neutral" as const,
-      description: "sisa budget",
+      description: "bulan ini",
     },
     {
       title: "Pengeluaran Tahun Ini",
@@ -81,14 +87,14 @@ export function ExpenseOverview() {
       description: "total transaksi",
     },
     {
-      title: "Kategori Aktif",
-      value: String(activeCategories),
-      icon: PieChart,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      change: `${activeCategories} kategori`,
+      title: "Cicilan Tahun Ini",
+      value: formatCurrency(installmentAmountThisYear),
+      icon: CreditCard,
+      color: "text-indigo-500",
+      bgColor: "bg-indigo-500/10",
+      change: `${installmentPaymentsThisYear.length} pembayaran`,
       changeType: "neutral" as const,
-      description: "digunakan bulan ini",
+      description: "tahun ini",
     },
   ]
 

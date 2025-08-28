@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { deleteExpenseWithBalanceRestore } from "@/lib/firestore"
 import { EditExpenseModal } from "@/components/edit-expense-modal"
 import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
+import { useExpenseFilters } from "@/hooks/use-expense-filters"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,8 @@ type Expense = {
   accountId: string
   date: string
   notes?: string
+  installmentPaymentId?: string // Link to installment payment
+  paymentNumber?: number // Payment number for installment
 }
 
 const categoryColors: Record<string, string> = {
@@ -47,6 +50,7 @@ const categoryColors: Record<string, string> = {
 
 export function ExpensesList() {
   const { data: expenses, loading } = useUserCollection<Expense>("expenses", [orderBy("date", "desc")])
+  const { filters } = useExpenseFilters()
   const [currentPage, setCurrentPage] = useState(1)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null)
@@ -55,8 +59,69 @@ export function ExpensesList() {
   const { toast } = useToast()
   const { user } = useAuth()
   
+  // Filter expenses based on current filters
+  const filteredExpenses = useMemo(() => {
+    let filtered = expenses
+
+    // Filter by search
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      filtered = filtered.filter(expense => 
+        expense.description.toLowerCase().includes(searchLower) ||
+        expense.notes?.toLowerCase().includes(searchLower) ||
+        expense.categoryName?.toLowerCase().includes(searchLower) ||
+        expense.accountName?.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Filter by category
+    if (filters.category !== "__all__") {
+      filtered = filtered.filter(expense => expense.categoryId === filters.category)
+    }
+
+    // Filter by account
+    if (filters.account !== "__all__") {
+      filtered = filtered.filter(expense => expense.accountId === filters.account)
+    }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      filtered = filtered.filter(expense => expense.date >= filters.dateFrom)
+    }
+    if (filters.dateTo) {
+      filtered = filtered.filter(expense => expense.date <= filters.dateTo)
+    }
+
+    // Filter by installment only
+    if (filters.installmentOnly) {
+      filtered = filtered.filter(expense => expense.installmentPaymentId)
+    }
+
+    // Sort expenses
+    switch (filters.sort) {
+      case "date-asc":
+        filtered = [...filtered].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        break
+      case "amount-desc":
+        filtered = [...filtered].sort((a, b) => b.amount - a.amount)
+        break
+      case "amount-asc":
+        filtered = [...filtered].sort((a, b) => a.amount - b.amount)
+        break
+      default: // date-desc
+        filtered = [...filtered].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    }
+
+    return filtered
+  }, [expenses, filters])
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters])
+  
   const itemsPerPage = 10
-  const totalPages = Math.ceil(expenses.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -119,7 +184,7 @@ export function ExpensesList() {
     })
   }
 
-  const paginatedExpenses = expenses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const paginatedExpenses = filteredExpenses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   return (
     <>
@@ -127,7 +192,9 @@ export function ExpensesList() {
         <CardHeader className="px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="text-card-foreground text-lg sm:text-xl">Daftar Pengeluaran</CardTitle>
-            <div className="text-sm text-muted-foreground">{loading ? "Memuat..." : `${expenses.length} transaksi`}</div>
+            <div className="text-sm text-muted-foreground">
+              {loading ? "Memuat..." : `${filteredExpenses.length} dari ${expenses.length} transaksi`}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -137,11 +204,28 @@ export function ExpensesList() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-3 mb-2">
-                      <div className="bg-red-500/10 p-2 rounded-lg flex-shrink-0">
-                        <Receipt className="h-4 w-4 text-red-500" />
+                      <div className={`p-2 rounded-lg flex-shrink-0 ${
+                        expense.installmentPaymentId 
+                          ? 'bg-blue-500/10' 
+                          : 'bg-red-500/10'
+                      }`}>
+                        {expense.installmentPaymentId ? (
+                          <div className="h-4 w-4 text-blue-500 flex items-center justify-center">
+                            <span className="text-xs font-bold">💰</span>
+                          </div>
+                        ) : (
+                          <Receipt className="h-4 w-4 text-red-500" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-card-foreground truncate text-sm sm:text-base">{expense.description}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-card-foreground truncate text-sm sm:text-base">{expense.description}</h3>
+                          {expense.installmentPaymentId && expense.paymentNumber && (
+                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
+                              Cicilan #{expense.paymentNumber}
+                            </Badge>
+                          )}
+                        </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
                           <Badge
                             variant="outline"

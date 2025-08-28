@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Filter, X, Calendar } from "lucide-react"
+import { Search, Filter, X, Calendar, CreditCard } from "lucide-react"
 import { useUserCollection } from "@/hooks/use-firestore"
+import { useExpenseFilters, type ExpenseFilters } from "@/hooks/use-expense-filters"
+import { useState } from "react"
 
 type Category = { id: string; name: string }
 type Account = { id: string; name: string }
@@ -21,6 +22,8 @@ export function useFilterData() {
   }
 }
 
+export type FilterData = ReturnType<typeof useFilterData>
+
 const sortOptions = [
   { value: "date-desc", label: "Tanggal Terbaru" },
   { value: "date-asc", label: "Tanggal Terlama" },
@@ -30,39 +33,12 @@ const sortOptions = [
 
 export function ExpenseFilters() {
   const { categories, accounts } = useFilterData()
-  const [filters, setFilters] = useState({
-    search: "",
-    category: DEFAULT_CATEGORY.id,
-    account: DEFAULT_ACCOUNT.id,
-    dateFrom: "",
-    dateTo: "",
-    sort: "date-desc",
-  })
-
+  const { filters, updateFilter, clearFilters, hasActiveFilters } = useExpenseFilters()
   const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+  const handleFilterChange = (key: keyof ExpenseFilters, value: string | boolean) => {
+    updateFilter(key, value)
   }
-
-  const clearFilters = () => {
-    setFilters({
-      search: "",
-      category: "Semua Kategori",
-      account: "Semua Rekening",
-      dateFrom: "",
-      dateTo: "",
-      sort: "date-desc",
-    })
-    setShowAdvanced(false)
-  }
-
-  const hasActiveFilters =
-    filters.search !== "" ||
-    filters.category !== DEFAULT_CATEGORY.id ||
-    filters.account !== DEFAULT_ACCOUNT.id ||
-    filters.dateFrom !== "" ||
-    filters.dateTo !== ""
 
   return (
     <Card className="bg-card border-border mb-6">
@@ -90,7 +66,7 @@ export function ExpenseFilters() {
                 Filter
               </Button>
               {hasActiveFilters && (
-                <Button variant="outline" size="sm" onClick={clearFilters} className="bg-background border-border">
+                <Button variant="outline" size="sm" onClick={() => { clearFilters(); setShowAdvanced(false); }} className="bg-background border-border">
                   <X className="h-4 w-4 mr-2" />
                   Reset
                 </Button>
@@ -100,7 +76,7 @@ export function ExpenseFilters() {
 
           {/* Advanced filters */}
           {showAdvanced && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-border">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-card-foreground">Kategori</label>
                 <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
@@ -157,6 +133,19 @@ export function ExpenseFilters() {
                   />
                   <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">Jenis Transaksi</label>
+                <Button
+                  variant={filters.installmentOnly ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleFilterChange("installmentOnly", !filters.installmentOnly ? "true" : "false")}
+                  className={`w-full justify-start ${filters.installmentOnly ? 'bg-blue-500 hover:bg-blue-600' : 'bg-background border-border'}`}
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  {filters.installmentOnly ? "Hanya Cicilan" : "Semua Transaksi"}
+                </Button>
               </div>
             </div>
           )}

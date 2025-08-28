@@ -3,12 +3,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CreditCard, AlertTriangle, CheckCircle, Clock } from "lucide-react"
+import { CreditCard, AlertTriangle, CheckCircle, Clock, DollarSign } from "lucide-react"
 import { useInstallments } from "@/hooks/use-installments"
+import { useUserCollection } from "@/hooks/use-firestore"
 import Link from "next/link"
 
 export function InstallmentSummary() {
   const { installments, loading } = useInstallments()
+  const { data: expenses } = useUserCollection<any>("expenses")
 
   if (loading) {
     return (
@@ -30,6 +32,16 @@ export function InstallmentSummary() {
   const totalActiveAmount = activeInstallments.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0)
   const totalOverdueAmount = overdueInstallments.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0)
   const totalCompletedAmount = completedInstallments.reduce((sum, i) => sum + Number(i.totalAmount || 0), 0)
+  
+  // Calculate installment payments from expenses
+  const installmentPayments = expenses.filter((e: any) => e.installmentPaymentId)
+  const totalInstallmentPayments = installmentPayments.reduce((sum, e) => sum + Number(e.amount || 0), 0)
+  const installmentPaymentsThisMonth = installmentPayments.filter((e: any) => {
+    const paymentDate = new Date(e.date)
+    const now = new Date()
+    return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear()
+  })
+  const totalInstallmentPaymentsThisMonth = installmentPaymentsThisMonth.reduce((sum, e) => sum + Number(e.amount || 0), 0)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -81,7 +93,7 @@ export function InstallmentSummary() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-card-foreground">
               {activeInstallments.length}
@@ -119,6 +131,16 @@ export function InstallmentSummary() {
             <div className="text-sm text-muted-foreground">Jatuh Tempo</div>
             <div className="text-xs text-orange-500">
               Dalam 30 hari
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-500">
+              {installmentPaymentsThisMonth.length}
+            </div>
+            <div className="text-sm text-muted-foreground">Dibayar Bulan Ini</div>
+            <div className="text-xs text-blue-500">
+              {formatCurrency(totalInstallmentPaymentsThisMonth)}
             </div>
           </div>
         </div>
@@ -173,6 +195,29 @@ export function InstallmentSummary() {
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Total Payments Summary */}
+        {installmentPayments.length > 0 && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="h-4 w-4 text-blue-500" />
+              <span className="font-medium text-blue-800">Total Pembayaran Cicilan</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-blue-700">Total Dibayar:</p>
+                <p className="font-semibold text-blue-800">{formatCurrency(totalInstallmentPayments)}</p>
+              </div>
+              <div>
+                <p className="text-blue-700">Bulan Ini:</p>
+                <p className="font-semibold text-blue-800">{formatCurrency(totalInstallmentPaymentsThisMonth)}</p>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Semua pembayaran cicilan juga tercatat di pengeluaran untuk tracking yang lebih baik
+            </p>
           </div>
         )}
 

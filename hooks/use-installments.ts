@@ -89,6 +89,18 @@ export function useInstallments() {
     }
   }
 
+  const payInstallmentAmountWithoutRefresh = async (input: InstallmentPaymentInput) => {
+    if (!user) throw new Error("User belum login")
+    
+    try {
+      await payInstallment(user.uid, input)
+      // Don't refresh data immediately - let the caller handle it
+    } catch (err: any) {
+      setError(err.message)
+      throw err
+    }
+  }
+
   const getInstallmentById = async (installmentId: string) => {
     if (!user) return null
     
@@ -119,6 +131,7 @@ export function useInstallments() {
     updateInstallmentData,
     removeInstallment,
     payInstallmentAmount,
+    payInstallmentAmountWithoutRefresh,
     getInstallmentById,
     getPaymentsForInstallment,
     refresh: loadInstallments,

@@ -1092,6 +1092,7 @@ export async function payInstallment(userId: string, input: InstallmentPaymentIn
   const installmentRef = doc(db as any, "users", userId, "installments", input.installmentId)
   const accountRef = doc(db as any, "users", userId, "accounts", input.accountId)
   const paymentsCol = collection(db as any, "users", userId, "installmentPayments")
+  const expensesCol = collection(db as any, "users", userId, "expenses")
 
   await runTransaction(db as any, async (transaction: any) => {
     // Get installment data
@@ -1142,6 +1143,25 @@ export async function payInstallment(userId: string, input: InstallmentPaymentIn
       accountName: input.accountName || accountData.name || null,
       notes: input.notes || "",
       createdAt: serverTimestamp(),
+    })
+    
+    // Create expense record for the installment payment
+    const expenseDescription = `Pembayaran Cicilan ${installmentData.title} - Cicilan ke-${input.paymentNumber}`
+    const expenseNotes = input.notes ? `Catatan: ${input.notes}` : `Pembayaran cicilan ${installmentData.title}`
+    
+    transaction.set(doc(expensesCol), {
+      amount: paymentAmount,
+      description: expenseDescription,
+      categoryId: installmentData.categoryId,
+      categoryName: installmentData.categoryName || null,
+      accountId: input.accountId,
+      accountName: input.accountName || accountData.name || null,
+      date: input.paymentDate,
+      notes: expenseNotes,
+      installmentPaymentId: input.installmentId, // Link to installment for tracking
+      paymentNumber: input.paymentNumber, // Track which payment number this is
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     })
     
     // Update installment data

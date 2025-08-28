@@ -62,7 +62,9 @@ export function InstallmentManagement() {
     updateInstallmentData, 
     removeInstallment,
     payInstallmentAmount,
-    getPaymentsForInstallment
+    payInstallmentAmountWithoutRefresh,
+    getPaymentsForInstallment,
+    refresh
   } = useInstallments()
   
   const expenseCategories = useMemo(() => allCategories.filter((c: any) => c.type === "expense"), [allCategories])
@@ -76,6 +78,8 @@ export function InstallmentManagement() {
   const [detailInstallment, setDetailInstallment] = useState<Installment | null>(null)
   const [paymentHistory, setPaymentHistory] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("all")
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [paymentProgress, setPaymentProgress] = useState({ current: 0, total: 0 })
   const { toast } = useToast()
 
   const [formData, setFormData] = useState({
@@ -212,13 +216,17 @@ export function InstallmentManagement() {
     try {
       if (!user || !selectedInstallment) throw new Error("Harus login dan cicilan dipilih")
       
+      // Set loading state to prevent UI glitches
+      setIsProcessingPayment(true)
+      
       // Handle multiple payments
       if (paymentData.paymentType === "multiple" || paymentData.paymentType === "full" || paymentData.paymentType === "custom") {
         const numberOfPayments = paymentData.paymentType === "full" 
           ? selectedInstallment.numberOfInstallments - selectedInstallment.paidInstallments
           : paymentData.numberOfPayments
         
-        // Process multiple payments - each payment is the installment amount
+        // Process multiple payments in batch - create all payment inputs first
+        const paymentInputs = []
         for (let i = 0; i < numberOfPayments; i++) {
           const paymentInput = {
             installmentId: selectedInstallment.id,
@@ -229,9 +237,17 @@ export function InstallmentManagement() {
             accountName: activeAccounts.find((a: any) => a.id === paymentData.accountId)?.name,
             notes: paymentData.notes,
           }
-          
-          await payInstallmentAmount(paymentInput)
+          paymentInputs.push(paymentInput)
         }
+        
+        // Process all payments sequentially without refreshing data between each payment
+        for (let i = 0; i < paymentInputs.length; i++) {
+          setPaymentProgress({ current: i + 1, total: paymentInputs.length })
+          await payInstallmentAmountWithoutRefresh(paymentInputs[i])
+        }
+        
+        // Refresh data only once after all payments are processed
+        await refresh()
         
         const paymentText = paymentData.paymentType === "full" 
           ? "semua cicilan yang tersisa"
@@ -278,6 +294,9 @@ export function InstallmentManagement() {
         description: err?.message || String(err),
         variant: "destructive"
       })
+    } finally {
+      setIsProcessingPayment(false)
+      setPaymentProgress({ current: 0, total: 0 })
     }
   }
 
@@ -1083,32 +1102,61 @@ export function InstallmentManagement() {
       </Card>
 
       {/* Payment Dialog */}
-      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className="sm:max-w-[400px] max-h-[90vh] bg-card border-border flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-card-foreground">
+      <Dialog open={isPaymentDialogOpen} onOpenChange={(open) => {
+        if (!isProcessingPayment) {
+          setIsPaymentDialogOpen(open)
+        }
+      }}>
+        <DialogContent className="w-[95vw] max-w-[700px] min-h-[600px] max-h-[85vh] bg-card border-border flex flex-col overflow-hidden">
+          {/* Loading overlay */}
+          {isProcessingPayment && (
+            <div className="absolute inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center z-50 rounded-xl">
+              <div className="text-center max-w-md">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
+                <p className="text-lg font-semibold text-foreground mb-4">
+                  {paymentProgress.total > 1 
+                    ? `Memproses pembayaran ${paymentProgress.current} dari ${paymentProgress.total}...`
+                    : 'Memproses pembayaran...'
+                  }
+                </p>
+                {paymentProgress.total > 1 && (
+                  <div className="w-full bg-muted rounded-full h-4 mt-4 mb-4">
+                    <div 
+                      className="bg-primary h-4 rounded-full transition-all duration-300"
+                      style={{ width: `${(paymentProgress.current / paymentProgress.total) * 100}%` }}
+                    />
+                  </div>
+                )}
+                <p className="text-base text-muted-foreground">
+                  Mohon tunggu, jangan tutup modal ini...
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogHeader className="flex-shrink-0 pb-6">
+            <DialogTitle className="text-card-foreground text-2xl font-bold">
               Bayar Cicilan
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base mt-2">
               {selectedInstallment && `Bayar cicilan: ${selectedInstallment.title}`}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handlePaymentSubmit} className="space-y-4 flex-1 overflow-y-auto pr-2">
-                        {/* Payment Options */}
-            <div className="space-y-3">
-              <Label className="text-card-foreground font-medium">
+                    <form onSubmit={handlePaymentSubmit} className="space-y-6 flex-1 overflow-y-auto pr-2 pb-4 scrollbar-hide">
+            {/* Payment Options */}
+            <div className="space-y-5">
+              <Label className="text-card-foreground font-semibold text-lg">
                 Pilih Jenis Pembayaran <span className="text-red-500">*</span>
               </Label>
-              <div className="grid gap-3">
+              <div className="grid gap-5 max-h-[350px] overflow-y-auto pr-2 scrollbar-hide">
                 {getPaymentOptions().map((option) => (
                   <div
                     key={option.value}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                    className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                       paymentData.paymentType === option.value || 
                       (option.value.startsWith('multiple_') && paymentData.paymentType === 'multiple' && 
                        paymentData.numberOfPayments === parseInt(option.value.split('_')[1]))
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-primary bg-primary/5 shadow-lg'
+                        : 'border-border hover:border-primary/50 hover:shadow-md'
                     }`}
                     onClick={() => {
                       if (option.value === 'single') {
@@ -1165,8 +1213,8 @@ export function InstallmentManagement() {
 
             {/* Custom Payment Input */}
             {paymentData.paymentType === 'custom' && (
-              <div className="space-y-3">
-                <Label htmlFor="customMonths" className="text-card-foreground">
+              <div className="space-y-5 p-6 bg-muted/30 rounded-xl border-2 border-border">
+                <Label htmlFor="customMonths" className="text-card-foreground font-medium">
                   Jumlah Bulan <span className="text-red-500">*</span>
                 </Label>
                 <Input
@@ -1190,53 +1238,57 @@ export function InstallmentManagement() {
                       amount: formatIDR(totalAmount)
                     }))
                   }}
-                  className="bg-background border-border w-full"
+                  className="bg-background border-border w-full h-12 text-lg"
                 />
                 {paymentData.customMonths && selectedInstallment && (
-                  <p className="text-sm text-muted-foreground">
-                    Total: {formatIDR(selectedInstallment.installmentAmount * parseInt(paymentData.customMonths))}
-                  </p>
+                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="text-sm font-medium text-primary">
+                      Total: {formatIDR(selectedInstallment.installmentAmount * parseInt(paymentData.customMonths))}
+                    </p>
+                  </div>
                 )}
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="paymentAmount" className="text-card-foreground">
-                Jumlah Pembayaran <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="paymentAmount"
-                placeholder="Rp 0"
-                value={paymentData.amount}
-                readOnly
-                disabled
-                className="bg-muted border-border w-full cursor-not-allowed"
-              />
-              <p className="text-xs text-muted-foreground">
-                Jumlah pembayaran otomatis dihitung berdasarkan pilihan jenis pembayaran
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <Label htmlFor="paymentAmount" className="text-card-foreground font-medium">
+                  Jumlah Pembayaran <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="paymentAmount"
+                  placeholder="Rp 0"
+                  value={paymentData.amount}
+                  readOnly
+                  disabled
+                  className="bg-muted border-border w-full cursor-not-allowed h-12 text-lg font-semibold"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Jumlah pembayaran otomatis dihitung berdasarkan pilihan jenis pembayaran
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <Label htmlFor="paymentDate" className="text-card-foreground font-medium">
+                  Tanggal Pembayaran <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="paymentDate"
+                  type="date"
+                  value={paymentData.paymentDate}
+                  onChange={(e) => setPaymentData((prev) => ({ ...prev, paymentDate: e.target.value }))}
+                  required
+                  className={`bg-background border-border w-full h-12 ${!paymentData.paymentDate ? 'border-red-300 focus:border-red-500' : ''} [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-0 [&::-webkit-calendar-picker-indicator]:contrast-100`}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="paymentDate" className="text-card-foreground">
-                Tanggal Pembayaran <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="paymentDate"
-                type="date"
-                value={paymentData.paymentDate}
-                onChange={(e) => setPaymentData((prev) => ({ ...prev, paymentDate: e.target.value }))}
-                required
-                className={`bg-background border-border w-full ${!paymentData.paymentDate ? 'border-red-300 focus:border-red-500' : ''} [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:brightness-0 [&::-webkit-calendar-picker-indicator]:contrast-100`}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="paymentAccountId" className="text-card-foreground">
+            <div className="space-y-4">
+              <Label htmlFor="paymentAccountId" className="text-card-foreground font-medium">
                 Rekening Pembayaran <span className="text-red-500">*</span>
               </Label>
               <Select value={paymentData.accountId} onValueChange={(value) => setPaymentData((prev) => ({ ...prev, accountId: value }))}>
-                <SelectTrigger className={`bg-background border-border w-full ${!paymentData.accountId ? 'border-red-300 focus:border-red-500' : ''}`}>
+                <SelectTrigger className={`bg-background border-border w-full h-12 ${!paymentData.accountId ? 'border-red-300 focus:border-red-500' : ''}`}>
                   <SelectValue placeholder="Pilih rekening" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1248,8 +1300,8 @@ export function InstallmentManagement() {
                     return (
                       <SelectItem key={account.id} value={account.id}>
                         <div className="flex items-center justify-between w-full">
-                          <span>{account.name} :</span>
-                          <span className={`text-xs ${isSufficient ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className="font-medium">{account.name}</span>
+                          <span className={`text-sm font-semibold ${isSufficient ? 'text-green-600' : 'text-red-600'}`}>
                             {formatIDR(accountBalance)}
                           </span>
                         </div>
@@ -1261,7 +1313,7 @@ export function InstallmentManagement() {
               
               {/* Balance Check */}
               {paymentData.accountId && paymentData.amount && (
-                <div className="mt-2">
+                <div className="mt-4">
                   {(() => {
                     const selectedAccount = activeAccounts.find((a: any) => a.id === paymentData.accountId)
                     const accountBalance = selectedAccount?.balance || 0
@@ -1269,28 +1321,38 @@ export function InstallmentManagement() {
                     const isSufficient = accountBalance >= paymentAmount
                     
                     return (
-                      <div className={`p-2 rounded-lg text-sm ${
+                      <div className={`p-4 rounded-xl text-sm border-2 ${
                         isSufficient 
-                          ? 'bg-green-50 border border-green-200 text-green-800' 
-                          : 'bg-red-50 border border-red-200 text-red-800'
+                          ? 'bg-green-50 border-green-200 text-green-800' 
+                          : 'bg-red-50 border-red-200 text-red-800'
                       }`}>
-                        <div className="flex items-center justify-between">
-                          <span>Saldo Rekening:</span>
-                          <span className="font-medium">{formatIDR(accountBalance)}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <span className="text-xs font-medium opacity-75">Saldo Rekening:</span>
+                            <div className="font-semibold text-lg">{formatIDR(accountBalance)}</div>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-xs font-medium opacity-75">Jumlah Pembayaran:</span>
+                            <div className="font-semibold text-lg">{formatIDR(paymentAmount)}</div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Jumlah Pembayaran:</span>
-                          <span className="font-medium">{formatIDR(paymentAmount)}</span>
+                        <div className="mt-3 pt-3 border-t border-current/20">
+                          <div className="flex items-center justify-between font-semibold">
+                            <span>Status:</span>
+                            <span className={`px-3 py-1 rounded-full text-xs ${
+                              isSufficient 
+                                ? 'bg-green-200 text-green-800' 
+                                : 'bg-red-200 text-red-800'
+                            }`}>
+                              {isSufficient ? '✅ Cukup' : '❌ Tidak Cukup'}
+                            </span>
+                          </div>
+                          {!isSufficient && (
+                            <p className="text-xs mt-2 font-medium">
+                              Kurang: {formatIDR(paymentAmount - accountBalance)}
+                            </p>
+                          )}
                         </div>
-                        <div className="flex items-center justify-between font-medium">
-                          <span>Status:</span>
-                          <span>{isSufficient ? '✅ Cukup' : '❌ Tidak Cukup'}</span>
-                        </div>
-                        {!isSufficient && (
-                          <p className="text-xs mt-1">
-                            Kurang: {formatIDR(paymentAmount - accountBalance)}
-                          </p>
-                        )}
                       </div>
                     )
                   })()}
@@ -1298,8 +1360,8 @@ export function InstallmentManagement() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="paymentNotes" className="text-card-foreground">
+            <div className="space-y-4">
+              <Label htmlFor="paymentNotes" className="text-card-foreground font-medium">
                 Catatan
               </Label>
               <Textarea
@@ -1307,20 +1369,33 @@ export function InstallmentManagement() {
                 placeholder="Catatan pembayaran (opsional)"
                 value={paymentData.notes}
                 onChange={(e) => setPaymentData((prev) => ({ ...prev, notes: e.target.value }))}
-                className="bg-background border-border w-full"
+                className="bg-background border-border w-full min-h-[80px] resize-none"
               />
             </div>
 
-            <DialogFooter className="flex-shrink-0 pt-4 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setIsPaymentDialogOpen(false)}>
+            <DialogFooter className="flex-shrink-0 pt-8 border-t border-border">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsPaymentDialogOpen(false)}
+                disabled={isProcessingPayment}
+                className="h-12 px-8 text-base"
+              >
                 Batal
               </Button>
               <Button 
                 type="submit" 
-                className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!isPaymentFormValid()}
+                className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed h-12 px-10 text-base font-semibold"
+                disabled={!isPaymentFormValid() || isProcessingPayment}
               >
-                Bayar Cicilan
+                {isProcessingPayment ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Memproses...
+                  </>
+                ) : (
+                  'Bayar Cicilan'
+                )}
               </Button>
             </DialogFooter>
           </form>
