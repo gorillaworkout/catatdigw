@@ -38,10 +38,6 @@ export function DashboardHeader({ setSidebarOpen, toggleSidebarCollapsed, isSide
               <Home className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
-          <Button variant="ghost" size="sm" className="relative p-2">
-            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs" />
-          </Button>
           <Button variant="ghost" size="sm" className="p-2" onClick={logout}>
             <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>

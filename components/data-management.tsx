@@ -113,7 +113,7 @@ export function DataManagement() {
       </Card>
 
       {/* Data Import */}
-      <Card className="bg-card border-border">
+      {/* <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-card-foreground">
             <Upload className="h-5 w-5" />
@@ -139,10 +139,10 @@ export function DataManagement() {
             Pilih File untuk Import
           </SubscriptionGuardButton>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Storage Usage */}
-      <Card className="bg-card border-border">
+      {/* <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-card-foreground">
             <Database className="h-5 w-5" />
@@ -182,10 +182,10 @@ export function DataManagement() {
             Bersihkan Cache
           </SubscriptionGuardButton>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Danger Zone */}
-      <Card className="bg-card border-destructive">
+      {/* <Card className="bg-card border-destructive">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
@@ -206,7 +206,7 @@ export function DataManagement() {
             </SubscriptionGuardButton>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

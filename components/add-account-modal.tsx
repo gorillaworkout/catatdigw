@@ -23,13 +23,7 @@ import { useAccounts, type Account as AccountType } from "@/hooks/use-accounts"
 import { formatIDR, parseIDR } from "@/lib/utils"
 import { SubscriptionGuardButton } from "@/components/subscription-guard-button"
 
-const accountTypes = [
-  { value: "bank", label: "Bank Account", icon: Building },
-  { value: "cash", label: "Cash", icon: Wallet },
-  { value: "credit", label: "Credit Card", icon: CreditCard },
-  { value: "investment", label: "Investment", icon: PiggyBank },
-  { value: "ewallet", label: "E-Wallet", icon: Wallet },
-]
+
 
 interface AddAccountModalProps {
   editingAccount?: AccountType | null
@@ -246,7 +240,7 @@ export function AddAccountModal({
           </SubscriptionGuardButton>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-card border-border z-[9999]">
+      <DialogContent className="sm:max-w-[500px] bg-card border-border overflow-visible">
         <DialogHeader>
           <DialogTitle className="text-card-foreground">{modalTitle}</DialogTitle>
           <DialogDescription>{modalDescription}</DialogDescription>
@@ -270,20 +264,54 @@ export function AddAccountModal({
               <Label className="text-card-foreground">Jenis Rekening *</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: string) => handleInputChange("type", value)}
+                onValueChange={(value: string) => {
+                  console.log("Selected type:", value)
+                  handleInputChange("type", value)
+                }}
+                onOpenChange={(open) => {
+                  console.log("Select dropdown open:", open)
+                }}
               >
                 <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Pilih jenis" />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  {accountTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value} className="text-popover-foreground">
-                      <div className="flex items-center gap-2">
-                        <type.icon className="h-4 w-4" />
-                        {type.label}
-                      </div>
-                    </SelectItem>
-                  ))}
+                <SelectContent 
+                  className="z-[60]"
+                  position="popper"
+                  sideOffset={4}
+                  avoidCollisions={true}
+                  collisionBoundary={document.body}
+                >
+                  <SelectItem value="bank" className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      Bank Account
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cash" className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4" />
+                      Cash
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="credit" className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      Credit Card
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="investment" className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <PiggyBank className="h-4 w-4" />
+                      Investment
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ewallet" className="cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4" />
+                      E-Wallet
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

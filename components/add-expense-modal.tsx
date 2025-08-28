@@ -59,15 +59,6 @@ export function AddExpenseModal() {
   const hasInsufficientFunds = expenseAmount > 0 && expenseAmount > currentBalance
   const isLargeExpense = expenseAmount > currentBalance * 0.5 // More than 50% of balance
 
-  // Debug information (can be removed in production)
-  const debugInfo = {
-    rawAmount: formData.amount,
-    parsedAmount: expenseAmount,
-    accountBalance: currentBalance,
-    hasInsufficientFunds,
-    canSubmit: expenseAmount > 0 && !hasInsufficientFunds && formData.description && formData.category && formData.account
-  }
-
   // Refresh data when modal opens to ensure latest balances
   useEffect(() => {
     if (open) {

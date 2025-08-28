@@ -106,7 +106,7 @@ export function FinancialCharts() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {/* Category Breakdown */}
         <Card className="bg-card border-border overflow-hidden">
           <CardHeader className="pb-3 sm:pb-6">

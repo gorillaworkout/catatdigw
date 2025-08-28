@@ -76,7 +76,7 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
         <div className="flex h-full flex-col">
           {/* Compact brand header at very top (no animation) */}
           <div className="px-3 py-2 border-b border-sidebar-border">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center md:justify-between">
               <div className="flex items-center gap-2">
                 <div className="bg-sidebar-primary rounded-md p-1.5">
                   <Wallet className="h-4 w-4 text-sidebar-primary-foreground" />
@@ -84,25 +84,6 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
                 {(!collapsed || open) && (
                   <span className="text-base font-semibold text-sidebar-foreground">catatdiGW</span>
                 )}
-              </div>
-              {/* Close on mobile */}
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="inline-flex h-8 w-8 p-0 text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent bg-background/60"
-                  onClick={() => setCollapsed && setCollapsed(!collapsed)}
-                  aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                  {collapsed ? (
-                    <PanelLeftOpen className="h-4 w-4" />
-                  ) : (
-                    <PanelLeftClose className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button variant="ghost" size="sm" className="lg:hidden h-8 w-8 p-0" onClick={() => setOpen(false)} aria-label="Close sidebar">
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
