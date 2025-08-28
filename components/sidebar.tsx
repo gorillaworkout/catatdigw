@@ -21,6 +21,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Calendar,
+  CreditCard,
 } from "lucide-react"
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import Link from "next/link"
@@ -46,6 +47,7 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
     { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
     { name: "Pengeluaran", href: "/dashboard/expenses", icon: TrendingDown },
     { name: "Pendapatan", href: "/dashboard/income", icon: TrendingUp },
+    { name: "Cicilan", href: "/dashboard/installments", icon: CreditCard },
     { name: "Pindah Dana", href: "/dashboard/transfer", icon: ArrowLeftRight },
     { name: "Subscription", href: "/dashboard/subscription", icon: Calendar },
     ...(isAdmin ? [{ name: "Admin", href: "/dashboard/admin", icon: Settings }] : []),

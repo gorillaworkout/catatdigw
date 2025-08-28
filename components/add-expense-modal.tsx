@@ -26,6 +26,7 @@ import { useSubscription } from "@/hooks/use-subscription"
 import { addExpenseWithBalanceCheck } from "@/lib/firestore"
 import { parseIDR, formatIDR } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { InstallmentSelector } from "@/components/installment-selector"
 
 type Category = { id: string; name: string; type: "expense" | "income" }
 type Account = { id: string; name: string; balance?: number }
@@ -51,6 +52,8 @@ export function AddExpenseModal() {
     date: new Date().toISOString().split("T")[0],
     notes: "",
   })
+  
+  const [selectedInstallmentId, setSelectedInstallmentId] = useState<string>("")
 
   // Get selected account details
   const selectedAccount = accounts.find(account => account.id === formData.account)
@@ -175,6 +178,7 @@ export function AddExpenseModal() {
         date: new Date().toISOString().split("T")[0],
         notes: "",
       })
+      setSelectedInstallmentId("")
       setOpen(false)
     } catch (err: any) {
       console.error("Error adding expense:", err)
@@ -378,6 +382,22 @@ export function AddExpenseModal() {
 
             </div>
           )}
+
+          <InstallmentSelector
+            selectedInstallmentId={selectedInstallmentId}
+            onInstallmentSelected={(installment, paymentAmount) => {
+              if (installment) {
+                setSelectedInstallmentId(installment.id)
+                // Optionally auto-fill the amount if it's a payment
+                if (paymentAmount > 0 && !formData.amount) {
+                  handleAmountChange(String(paymentAmount))
+                }
+              } else {
+                setSelectedInstallmentId("")
+              }
+            }}
+            disabled={loading}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-card-foreground">

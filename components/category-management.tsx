@@ -229,7 +229,7 @@ export function CategoryManagement() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-1 bg-muted">
+            <TabsList className="grid w-full flex flex-row flex-wrap">
               <TabsTrigger value="expense">Kategori Pengeluaran</TabsTrigger>
               <TabsTrigger value="income">Kategori Pendapatan</TabsTrigger>
             </TabsList>

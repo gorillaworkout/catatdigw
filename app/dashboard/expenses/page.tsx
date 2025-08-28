@@ -5,6 +5,7 @@ import { ExpenseFilters } from "@/components/expense-filters"
 import { ExpensesList } from "@/components/expenses-list"
 import { ExpenseCharts } from "@/components/expense-charts"
 import { AddExpenseModal } from "@/components/add-expense-modal"
+import { PayInstallmentModal } from "@/components/pay-installment-modal"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 import { SubscriptionGuard } from "@/components/subscription-guard"
 import { SubscriptionNotification } from "@/components/subscription-notification"
@@ -26,6 +27,7 @@ export default function ExpensesPage() {
           </div>
           <div className="flex items-center gap-3">
             <AddExpenseModal />
+            <PayInstallmentModal />
           </div>
         </div>
 

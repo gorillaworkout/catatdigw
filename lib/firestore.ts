@@ -887,6 +887,309 @@ export async function adminExtendUserSubscription(
   })
 }
 
+// Installment management
+export type InstallmentInput = {
+  title: string
+  description?: string
+  totalAmount: number
+  numberOfInstallments: number
+  installmentAmount: number
+  interestRate?: number
+  monthlyInterest?: number
+  totalWithInterest?: number
+  startDate: string // ISO yyyy-mm-dd
+  dueDate: string // ISO yyyy-mm-dd
+  accountId: string
+  accountName?: string
+  categoryId: string
+  categoryName?: string
+  status: "active" | "completed" | "overdue"
+  notes?: string
+}
+
+export type InstallmentPaymentInput = {
+  installmentId: string
+  paymentNumber: number
+  amount: number
+  paymentDate: string // ISO yyyy-mm-dd
+  accountId: string
+  accountName?: string
+  notes?: string
+}
+
+// Create new installment
+export async function createInstallment(userId: string, input: InstallmentInput) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+  
+  // Check subscription status
+  const isActive = await isSubscriptionActive(userId)
+  if (!isActive) {
+    throw new Error("Subscription Anda telah berakhir. Silakan perpanjang subscription untuk menambah cicilan.")
+  }
+  
+  if (!input.title?.trim()) throw new Error("Judul cicilan wajib diisi")
+  if (!input.accountId) throw new Error("Rekening wajib dipilih")
+  if (!input.categoryId) throw new Error("Kategori wajib dipilih")
+  if (!input.startDate) throw new Error("Tanggal mulai wajib dipilih")
+  if (!input.dueDate) throw new Error("Tanggal jatuh tempo wajib dipilih")
+  if (input.totalAmount <= 0) throw new Error("Total jumlah cicilan harus lebih dari 0")
+  if (input.numberOfInstallments <= 0) throw new Error("Jumlah cicilan harus lebih dari 0")
+  if (input.installmentAmount <= 0) throw new Error("Jumlah per cicilan harus lebih dari 0")
+
+  const col = collection(db as any, "users", userId, "installments")
+  return addDoc(col, {
+    title: input.title.trim(),
+    description: input.description?.trim() || "",
+    totalAmount: Number(input.totalAmount),
+    numberOfInstallments: Number(input.numberOfInstallments),
+    installmentAmount: Number(input.installmentAmount),
+    interestRate: Number(input.interestRate || 0),
+    monthlyInterest: Number(input.monthlyInterest || 0),
+    totalWithInterest: Number(input.totalWithInterest || input.totalAmount),
+    startDate: input.startDate,
+    dueDate: input.dueDate,
+    accountId: input.accountId,
+    accountName: input.accountName || null,
+    categoryId: input.categoryId,
+    categoryName: input.categoryName || null,
+    status: (() => {
+      // Determine initial status based on due date
+      const dueDate = new Date(input.dueDate)
+      const now = new Date()
+      if (now > dueDate) {
+        return "overdue"
+      }
+      return "active"
+    })(),
+    notes: input.notes || "",
+    paidInstallments: 0,
+    totalPaid: 0,
+    remainingAmount: Number(input.totalWithInterest || input.totalAmount),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+// Get all installments for a user
+export async function getInstallments(userId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const installmentsCol = collection(db as any, "users", userId, "installments")
+  const installmentsSnap = await getDocs(installmentsCol)
+  
+  const installments = installmentsSnap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }))
+  
+  // Update status for installments that need correction
+  for (const installment of installments) {
+    const installmentData = installment as any
+    const isCompleted = installmentData.paidInstallments >= installmentData.numberOfInstallments || installmentData.remainingAmount <= 0
+    const isOverdue = new Date() > new Date(installmentData.dueDate) && !isCompleted
+    
+    let correctStatus = "active"
+    if (isCompleted) {
+      correctStatus = "completed"
+    } else if (isOverdue) {
+      correctStatus = "overdue"
+    }
+    
+    // Update status if it's incorrect
+    if (installmentData.status !== correctStatus) {
+      const ref = doc(db as any, "users", userId, "installments", installment.id)
+      const { updateDoc } = await import("firebase/firestore")
+      await updateDoc(ref, { 
+        status: correctStatus,
+        updatedAt: serverTimestamp() 
+      } as any)
+      
+      // Update the local data
+      installmentData.status = correctStatus
+    }
+  }
+  
+  return installments
+}
+
+// Get installment by ID
+export async function getInstallment(userId: string, installmentId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const installmentRef = doc(db as any, "users", userId, "installments", installmentId)
+  const installmentSnap = await getDoc(installmentRef)
+  
+  if (!installmentSnap.exists()) {
+    return null
+  }
+  
+  return {
+    id: installmentSnap.id,
+    ...installmentSnap.data()
+  }
+}
+
+// Update installment
+export async function updateInstallment(userId: string, installmentId: string, input: Partial<InstallmentInput>) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  // Get current installment data to calculate correct status
+  const currentInstallment = await getInstallment(userId, installmentId)
+  if (!currentInstallment) {
+    throw new Error("Cicilan tidak ditemukan")
+  }
+  
+  // Calculate new status based on current data and updates
+  let newStatus = (currentInstallment as any).status
+  
+  // If due date is being updated, recalculate status
+  if (input.dueDate) {
+    const dueDate = new Date(input.dueDate)
+    const now = new Date()
+    if (now > dueDate) {
+      newStatus = "overdue"
+    } else if ((currentInstallment as any).paidInstallments >= (currentInstallment as any).numberOfInstallments) {
+      newStatus = "completed"
+    } else {
+      newStatus = "active"
+    }
+  }
+  
+  const ref = doc(db as any, "users", userId, "installments", installmentId)
+  const { updateDoc } = await import("firebase/firestore")
+  await updateDoc(ref, { 
+    ...input, 
+    status: newStatus,
+    updatedAt: serverTimestamp() 
+  } as any)
+}
+
+// Delete installment
+export async function deleteInstallment(userId: string, installmentId: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  const ref = doc(db as any, "users", userId, "installments", installmentId)
+  const { deleteDoc } = await import("firebase/firestore")
+  await deleteDoc(ref)
+}
+
+// Pay installment
+export async function payInstallment(userId: string, input: InstallmentPaymentInput) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  if (!userId) throw new Error("User belum login")
+  
+  // Check subscription status
+  const isActive = await isSubscriptionActive(userId)
+  if (!isActive) {
+    throw new Error("Subscription Anda telah berakhir. Silakan perpanjang subscription untuk membayar cicilan.")
+  }
+  
+  if (!input.installmentId) throw new Error("Cicilan wajib dipilih")
+  if (!input.accountId) throw new Error("Rekening wajib dipilih")
+  if (!input.paymentDate) throw new Error("Tanggal pembayaran wajib dipilih")
+  if (input.amount <= 0) throw new Error("Jumlah pembayaran harus lebih dari 0")
+
+  const installmentRef = doc(db as any, "users", userId, "installments", input.installmentId)
+  const accountRef = doc(db as any, "users", userId, "accounts", input.accountId)
+  const paymentsCol = collection(db as any, "users", userId, "installmentPayments")
+
+  await runTransaction(db as any, async (transaction: any) => {
+    // Get installment data
+    const installmentSnap = await transaction.get(installmentRef)
+    if (!installmentSnap.exists()) {
+      throw new Error("Cicilan tidak ditemukan")
+    }
+    
+    const installmentData = installmentSnap.data()
+    const currentPaidInstallments = Number(installmentData.paidInstallments || 0)
+    const currentTotalPaid = Number(installmentData.totalPaid || 0)
+    const totalAmount = Number(installmentData.totalWithInterest || installmentData.totalAmount || 0)
+    const remainingAmount = Number(installmentData.remainingAmount || totalAmount)
+    const paymentAmount = Number(input.amount)
+    
+    // Check if payment amount exceeds remaining amount
+    if (paymentAmount > remainingAmount) {
+      throw new Error(`Jumlah pembayaran melebihi sisa cicilan. Sisa: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(remainingAmount)}`)
+    }
+    
+    // Get account data for balance check
+    const accountSnap = await transaction.get(accountRef)
+    if (!accountSnap.exists()) {
+      throw new Error("Rekening tidak ditemukan")
+    }
+    
+    const accountData = accountSnap.data()
+    const currentBalance = Number(accountData.balance || 0)
+    
+    if (currentBalance < paymentAmount) {
+      const shortfall = paymentAmount - currentBalance
+      throw new Error(`Saldo rekening tidak mencukupi. Kekurangan: ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(shortfall)}`)
+    }
+    
+    // Update account balance
+    transaction.update(accountRef, { 
+      balance: currentBalance - paymentAmount,
+      updatedAt: serverTimestamp()
+    })
+    
+    // Create payment record
+    transaction.set(doc(paymentsCol), {
+      installmentId: input.installmentId,
+      paymentNumber: input.paymentNumber,
+      amount: paymentAmount,
+      paymentDate: input.paymentDate,
+      accountId: input.accountId,
+      accountName: input.accountName || accountData.name || null,
+      notes: input.notes || "",
+      createdAt: serverTimestamp(),
+    })
+    
+    // Update installment data
+    const newTotalPaid = currentTotalPaid + paymentAmount
+    const newRemainingAmount = remainingAmount - paymentAmount
+    const installmentAmount = Number(installmentData.installmentAmount || 0)
+    const newPaidInstallments = installmentAmount > 0 ? Math.ceil(newTotalPaid / installmentAmount) : 0
+    
+    // Determine new status based on both remaining amount and paid installments
+    let newStatus = "active"
+    if (newRemainingAmount <= 0 || newPaidInstallments >= installmentData.numberOfInstallments) {
+      newStatus = "completed"
+    } else if (newRemainingAmount > 0 && new Date() > new Date(installmentData.dueDate)) {
+      newStatus = "overdue"
+    }
+    
+    transaction.update(installmentRef, {
+      paidInstallments: newPaidInstallments,
+      totalPaid: newTotalPaid,
+      remainingAmount: newRemainingAmount,
+      status: newStatus,
+      updatedAt: serverTimestamp(),
+    })
+  })
+}
+
+// Get installment payments
+export async function getInstallmentPayments(userId: string, installmentId?: string) {
+  if (!db) throw new Error("Firestore belum terinisialisasi")
+  
+  const paymentsCol = collection(db as any, "users", userId, "installmentPayments")
+  
+  if (installmentId) {
+    const paymentsQuery = query(paymentsCol, where("installmentId", "==", installmentId))
+    const paymentsSnap = await getDocs(paymentsQuery)
+    return paymentsSnap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }))
+  } else {
+    const paymentsSnap = await getDocs(paymentsCol)
+    return paymentsSnap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }))
+  }
+}
+
 // Update user role (admin only)
 export async function updateUserRole(adminUserId: string, targetUserId: string, newRole: UserRole) {
   if (!db) throw new Error("Firestore belum terinisialisasi")

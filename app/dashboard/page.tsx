@@ -7,6 +7,7 @@ import { FinancialCharts } from "@/components/financial-charts"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
 import { SubscriptionStatus } from "@/components/subscription-status"
 import { SubscriptionNotification } from "@/components/subscription-notification"
+import { InstallmentSummary } from "@/components/installment-summary"
 
 export const metadata = {
   title: "Dashboard - catatdiGW",
@@ -31,6 +32,9 @@ export default function DashboardPage() {
         <Suspense fallback={<DashboardSkeleton />}>
           <SubscriptionNotification variant="compact" />
           <DashboardOverview />
+          
+          {/* Installment Summary */}
+          <InstallmentSummary />
           
           {/* Accounts and Subscription Status */}
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
