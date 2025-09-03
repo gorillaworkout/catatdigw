@@ -47,15 +47,15 @@ export function DashboardOverview() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {cards.map((card, index) => (
           <Card key={index} className="bg-card border-border hover:shadow-md transition-all duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-6 pt-6">
-              <CardTitle className="text-sm font-medium text-card-foreground">{card.title}</CardTitle>
-              <div className={`p-2.5 rounded-xl ${card.bgColor}`}>
-                <card.icon className={`h-5 w-5 ${card.color}`} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 sm:px-6 pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-card-foreground leading-tight">{card.title}</CardTitle>
+              <div className={`p-2 sm:p-2.5 rounded-xl ${card.bgColor} flex-shrink-0`}>
+                <card.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${card.color}`} />
               </div>
             </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <div className="text-2xl lg:text-3xl font-bold text-card-foreground mb-2">{card.value}</div>
-              <p className="text-sm text-muted-foreground">
+            <CardContent className="px-4 sm:px-6 pb-6">
+              <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-card-foreground mb-2 break-words leading-tight">{card.value}</div>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-tight">
                 <span className={card.changeType === "positive" ? "text-green-500" : "text-red-500"}>{card.change}</span>{" "}
                 dari bulan lalu
               </p>

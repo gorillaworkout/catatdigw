@@ -93,53 +93,53 @@ export function InstallmentSummary() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-card-foreground">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-card-foreground leading-tight">
               {activeInstallments.length}
             </div>
-            <div className="text-sm text-muted-foreground">Aktif</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground leading-tight">Aktif</div>
+            <div className="text-xs text-muted-foreground leading-tight break-words">
               {formatCurrency(totalActiveAmount)}
             </div>
           </div>
           
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-500">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-500 leading-tight">
               {overdueInstallments.length}
             </div>
-            <div className="text-sm text-muted-foreground">Terlambat</div>
-            <div className="text-xs text-red-500">
+            <div className="text-xs sm:text-sm text-muted-foreground leading-tight">Terlambat</div>
+            <div className="text-xs text-red-500 leading-tight break-words">
               {formatCurrency(totalOverdueAmount)}
             </div>
           </div>
           
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-500">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-500 leading-tight">
               {completedInstallments.length}
             </div>
-            <div className="text-sm text-muted-foreground">Lunas</div>
-            <div className="text-xs text-green-500">
+            <div className="text-xs sm:text-sm text-muted-foreground leading-tight">Lunas</div>
+            <div className="text-xs text-green-500 leading-tight break-words">
               {formatCurrency(totalCompletedAmount)}
             </div>
           </div>
           
           <div className="text-center">
-            <div className="text-2xl font-bold text-orange-500">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-orange-500 leading-tight">
               {upcomingInstallments.length}
             </div>
-            <div className="text-sm text-muted-foreground">Jatuh Tempo</div>
-            <div className="text-xs text-orange-500">
+            <div className="text-xs sm:text-sm text-muted-foreground leading-tight">Jatuh Tempo</div>
+            <div className="text-xs text-orange-500 leading-tight">
               Dalam 30 hari
             </div>
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-500">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-500 leading-tight">
               {installmentPaymentsThisMonth.length}
             </div>
-            <div className="text-sm text-muted-foreground">Dibayar Bulan Ini</div>
-            <div className="text-xs text-blue-500">
+            <div className="text-xs sm:text-sm text-muted-foreground leading-tight">Dibayar Bulan Ini</div>
+            <div className="text-xs text-blue-500 leading-tight break-words">
               {formatCurrency(totalInstallmentPaymentsThisMonth)}
             </div>
           </div>
@@ -150,9 +150,9 @@ export function InstallmentSummary() {
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              <span className="font-medium text-red-800">Cicilan Terlambat</span>
+              <span className="font-medium text-red-800 text-sm">Cicilan Terlambat</span>
             </div>
-            <p className="text-sm text-red-700 mb-2">
+            <p className="text-xs sm:text-sm text-red-700 mb-2 leading-tight">
               Anda memiliki {overdueInstallments.length} cicilan yang terlambat dengan total {formatCurrency(totalOverdueAmount)}
             </p>
             <Link href="/dashboard/installments">
@@ -168,19 +168,19 @@ export function InstallmentSummary() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-orange-500" />
-              <span className="font-medium text-card-foreground">Jatuh Tempo Dalam 30 Hari</span>
+              <span className="font-medium text-card-foreground text-sm">Jatuh Tempo Dalam 30 Hari</span>
             </div>
             <div className="space-y-2">
               {upcomingInstallments.slice(0, 3).map((installment: any) => (
                 <div key={installment.id} className="flex items-center justify-between p-2 bg-orange-50 border border-orange-200 rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm text-orange-800">{installment.title}</p>
-                    <p className="text-xs text-orange-600">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-xs sm:text-sm text-orange-800 leading-tight truncate">{installment.title}</p>
+                    <p className="text-xs text-orange-600 leading-tight">
                       Jatuh tempo: {new Date(installment.dueDate).toLocaleDateString("id-ID")}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-orange-800">
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="text-xs sm:text-sm font-medium text-orange-800 leading-tight">
                       {formatCurrency(installment.remainingAmount)}
                     </p>
                     <Badge variant="outline" className="text-xs">
@@ -203,19 +203,19 @@ export function InstallmentSummary() {
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-blue-500" />
-              <span className="font-medium text-blue-800">Total Pembayaran Cicilan</span>
+              <span className="font-medium text-blue-800 text-sm">Total Pembayaran Cicilan</span>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm">
               <div>
-                <p className="text-blue-700">Total Dibayar:</p>
-                <p className="font-semibold text-blue-800">{formatCurrency(totalInstallmentPayments)}</p>
+                <p className="text-blue-700 leading-tight">Total Dibayar:</p>
+                <p className="font-semibold text-blue-800 leading-tight break-words">{formatCurrency(totalInstallmentPayments)}</p>
               </div>
               <div>
-                <p className="text-blue-700">Bulan Ini:</p>
-                <p className="font-semibold text-blue-800">{formatCurrency(totalInstallmentPaymentsThisMonth)}</p>
+                <p className="text-blue-700 leading-tight">Bulan Ini:</p>
+                <p className="font-semibold text-blue-800 leading-tight break-words">{formatCurrency(totalInstallmentPaymentsThisMonth)}</p>
               </div>
             </div>
-            <p className="text-xs text-blue-600 mt-2">
+            <p className="text-xs text-blue-600 mt-2 leading-tight">
               Semua pembayaran cicilan juga tercatat di pengeluaran untuk tracking yang lebih baik
             </p>
           </div>

@@ -145,12 +145,12 @@ export default function HelpPage() {
       description: "Tambah dan atur rekening keuangan",
       link: "/dashboard/settings"
     },
-    { 
-      icon: TrendingUp, 
-      title: "Lihat Laporan", 
-      description: "Analisis keuangan dan laporan",
-      link: "/dashboard/reports"
-    },
+    // { 
+    //   icon: TrendingUp, 
+    //   title: "Lihat Laporan", 
+    //   description: "Analisis keuangan dan laporan",
+    //   link: "/dashboard/reports"
+    // },
     { 
       icon: Wallet, 
       title: "Dashboard", 

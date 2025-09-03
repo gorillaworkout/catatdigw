@@ -74,9 +74,9 @@ export function FinancialCharts() {
     <div className="space-y-4 sm:space-y-6">
       {/* Income vs Expenses Chart */}
       <Card className="bg-card border-border overflow-hidden">
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="text-card-foreground text-lg sm:text-xl">Pendapatan vs Pengeluaran</CardTitle>
-          <CardDescription className="text-sm sm:text-base">Perbandingan bulanan dalam 6 bulan terakhir</CardDescription>
+        <CardHeader className="pb-3 sm:pb-6 px-4 sm:px-6">
+          <CardTitle className="text-card-foreground text-base sm:text-lg lg:text-xl leading-tight">Pendapatan vs Pengeluaran</CardTitle>
+          <CardDescription className="text-xs sm:text-sm lg:text-base leading-tight">Perbandingan bulanan dalam 6 bulan terakhir</CardDescription>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
           <ChartContainer
@@ -84,19 +84,19 @@ export function FinancialCharts() {
               income: { label: "Pendapatan", color: "hsl(var(--chart-1))" },
               expenses: { label: "Pengeluaran", color: "hsl(var(--chart-2))" },
             }}
-            className="w-full h-64 sm:h-80 aspect-auto overflow-hidden"
+            className="w-full h-48 sm:h-64 lg:h-80 aspect-auto overflow-hidden"
           >
             <BarChart data={monthly} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
               <XAxis
                 dataKey="month"
-                fontSize={12}
-                tick={{ fontSize: "12px" }}
+                fontSize={10}
+                tick={{ fontSize: "10px" }}
               />
               <YAxis
                 tickFormatter={(value) => `${value / 1000000}M`}
-                fontSize={12}
-                tick={{ fontSize: "12px" }}
-                width={40}
+                fontSize={10}
+                tick={{ fontSize: "10px" }}
+                width={35}
               />
               <ChartTooltip content={<ChartTooltipContent formatter={(value) => formatCurrency(Number(value))} />} />
               <Bar dataKey="income" fill="var(--color-income)" radius={4} />
@@ -109,16 +109,16 @@ export function FinancialCharts() {
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {/* Category Breakdown */}
         <Card className="bg-card border-border overflow-hidden">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="text-card-foreground text-lg sm:text-xl">Kategori Pengeluaran</CardTitle>
-            <CardDescription className="text-sm sm:text-base">Breakdown pengeluaran bulan ini</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6 px-4 sm:px-6">
+            <CardTitle className="text-card-foreground text-base sm:text-lg lg:text-xl leading-tight">Kategori Pengeluaran</CardTitle>
+            <CardDescription className="text-xs sm:text-sm lg:text-base leading-tight">Breakdown pengeluaran bulan ini</CardDescription>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
             <ChartContainer
               config={{
                 value: { label: "Jumlah", color: "hsl(var(--chart-2))" },
               }}
-              className="w-full h-56 sm:h-64 aspect-auto overflow-hidden"
+              className="w-full h-48 sm:h-64 lg:h-80 aspect-auto overflow-hidden"
             >
               <PieChart>
                 <Pie

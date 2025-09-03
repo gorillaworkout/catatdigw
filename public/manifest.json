@@ -1,5 +1,5 @@
 {
-  "name": "catatdiGW - Pencatatan Keuangan",
+  "name": "catatdiGW",
   "short_name": "catatdiGW",
   "description": "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
   "start_url": "/",
@@ -9,13 +9,25 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/catatdigw.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/catatdigw.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/catatdigw.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/catatdigw.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

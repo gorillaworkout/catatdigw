@@ -16,7 +16,7 @@ import {
   adminExpireUserSubscription,
   adminExtendUserSubscription,
   getAllUsersWithSubscriptions,
-  getAllUsersDebug,
+
   updateUserRole,
   type SubscriptionStatus,
   type UserRole
@@ -199,52 +199,52 @@ export function AdminSubscriptionManager() {
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total User</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium leading-tight">Total User</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight">{stats.total}</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscription Aktif</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium leading-tight">Subscription Aktif</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 leading-tight">{stats.active}</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscription Berakhir</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium leading-tight">Subscription Berakhir</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.expired}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 leading-tight">{stats.expired}</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admin</CardTitle>
-            <Crown className="h-4 w-4 text-purple-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium leading-tight">Admin</CardTitle>
+            <Crown className="h-4 w-4 text-purple-500 flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.admin}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600 leading-tight">{stats.admin}</div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hampir Habis</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium leading-tight">Hampir Habis</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500 flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-orange-600 leading-tight">{stats.expiringSoon}</div>
           </CardContent>
         </Card>
       </div>

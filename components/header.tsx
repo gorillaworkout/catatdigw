@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { useAuth } from "@/hooks/use-auth"
-import { Menu, X, Wallet } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { Menu, X } from "lucide-react";
+import Image from "next/image"
 
 export function Header() {
   const { user, loading, signInWithGoogle, logout } = useAuth()
@@ -15,11 +16,20 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="bg-primary rounded-lg p-2">
-              <Wallet className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">catatdiGW</span>
+          <div className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/catatdigw.png"
+                  alt="catatdiGW Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                  priority
+                />
+              </div>
+              <span className="text-xl font-bold text-foreground">catatdiGW</span>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}

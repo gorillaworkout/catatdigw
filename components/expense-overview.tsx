@@ -99,18 +99,18 @@ export function ExpenseOverview() {
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {cards.map((card, index) => (
         <Card key={index} className="bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">{card.title}</CardTitle>
-            <div className={`p-2 rounded-lg ${card.bgColor}`}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-card-foreground leading-tight">{card.title}</CardTitle>
+            <div className={`p-2 rounded-lg ${card.bgColor} flex-shrink-0`}>
               <card.icon className={`h-4 w-4 ${card.color}`} />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{card.value}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-card-foreground break-words leading-tight">{card.value}</div>
+            <p className="text-xs text-muted-foreground leading-tight">
               <span
                 className={
                   card.changeType === "positive"

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - catatdiGW</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/catatdigw.png">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1f2937;
+            color: #f9fafb;
+        }
+        .test-section {
+            background: #374151;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 PWA Test - catatdiGW</h1>
+    
+    <div class="test-section">
+        <h2>📱 PWA Installation Test</h2>
+        <p>Check if the app can be installed as a PWA:</p>
+        <div id="install-status">Checking...</div>
+        <button id="install-btn" style="display: none;">Install PWA</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🎨 Logo Assets Test</h2>
+        <p>Testing all logo formats:</p>
+        <img src="/catatdigw.png" alt="PNG Logo" class="logo">
+        <img src="/catatdigw.webp" alt="WebP Logo" class="logo">
+        <img src="/catatdigw.png" alt="Icon 192" class="logo">
+        <img src="/catatdigw.png" alt="Icon 512" class="logo">
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Manifest Test</h2>
+        <div id="manifest-status">Checking...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Service Worker Test</h2>
+        <div id="sw-status">Checking...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 PWA Score</h2>
+        <div id="pwa-score">Calculating...</div>
+    </div>
+
+    <script>
+        // PWA Installation Test
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        const installStatus = document.getElementById('install-status');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+            installStatus.innerHTML = '<span class="success">✅ PWA can be installed!</span>';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installStatus.innerHTML = '<span class="success">✅ PWA installed successfully!</span>';
+                } else {
+                    installStatus.innerHTML = '<span class="warning">⚠️ PWA installation declined</span>';
+                }
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Manifest Test
+        async function testManifest() {
+            try {
+                const response = await fetch('/manifest.json');
+                const manifest = await response.json();
+                const manifestStatus = document.getElementById('manifest-status');
+                
+                let status = '<span class="success">✅ Manifest loaded successfully!</span><br>';
+                status += `<strong>Name:</strong> ${manifest.name}<br>`;
+                status += `<strong>Short Name:</strong> ${manifest.short_name}<br>`;
+                status += `<strong>Icons:</strong> ${manifest.icons.length} icons found<br>`;
+                status += `<strong>Theme Color:</strong> ${manifest.theme_color}<br>`;
+                status += `<strong>Background Color:</strong> ${manifest.background_color}`;
+                
+                manifestStatus.innerHTML = status;
+            } catch (error) {
+                document.getElementById('manifest-status').innerHTML = 
+                    '<span class="error">❌ Manifest failed to load</span>';
+            }
+        }
+
+        // Service Worker Test
+        async function testServiceWorker() {
+            const swStatus = document.getElementById('sw-status');
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        swStatus.innerHTML = '<span class="success">✅ Service Worker registered!</span><br>' +
+                            `<strong>Scope:</strong> ${registration.scope}<br>` +
+                            `<strong>State:</strong> ${registration.active ? 'Active' : 'Inactive'}`;
+                    } else {
+                        swStatus.innerHTML = '<span class="warning">⚠️ Service Worker not registered</span>';
+                    }
+                } catch (error) {
+                    swStatus.innerHTML = '<span class="error">❌ Service Worker error</span>';
+                }
+            } else {
+                swStatus.innerHTML = '<span class="error">❌ Service Worker not supported</span>';
+            }
+        }
+
+        // PWA Score Calculation
+        function calculatePWAScore() {
+            let score = 0;
+            let maxScore = 100;
+            let details = '';
+
+            // Manifest (25 points)
+            if (document.querySelector('link[rel="manifest"]')) {
+                score += 25;
+                details += '✅ Manifest: 25/25<br>';
+            } else {
+                details += '❌ Manifest: 0/25<br>';
+            }
+
+            // Service Worker (25 points)
+            if ('serviceWorker' in navigator) {
+                score += 25;
+                details += '✅ Service Worker: 25/25<br>';
+            } else {
+                details += '❌ Service Worker: 0/25<br>';
+            }
+
+            // HTTPS (20 points)
+            if (location.protocol === 'https:' || location.hostname === 'localhost') {
+                score += 20;
+                details += '✅ HTTPS: 20/20<br>';
+            } else {
+                details += '❌ HTTPS: 0/20<br>';
+            }
+
+            // Icons (20 points)
+            const icons = document.querySelectorAll('link[rel*="icon"]');
+            if (icons.length >= 3) {
+                score += 20;
+                details += '✅ Icons: 20/20<br>';
+            } else {
+                details += '❌ Icons: 0/20<br>';
+            }
+
+            // Responsive (10 points)
+            if (document.querySelector('meta[name="viewport"]')) {
+                score += 10;
+                details += '✅ Responsive: 10/10<br>';
+            } else {
+                details += '❌ Responsive: 0/10<br>';
+            }
+
+            const pwaScore = document.getElementById('pwa-score');
+            pwaScore.innerHTML = `<strong>PWA Score: ${score}/${maxScore}</strong><br>${details}`;
+        }
+
+        // Run tests
+        window.addEventListener('load', () => {
+            testManifest();
+            testServiceWorker();
+            calculatePWAScore();
+        });
+    </script>
+</body>
+</html>
