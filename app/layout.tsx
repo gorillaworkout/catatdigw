@@ -15,11 +15,11 @@ export const metadata: Metadata = {
   creator: "catatdiGW Team",
   publisher: "catatdiGW",
   robots: "index, follow",
-  metadataBase: new URL("https://catatdigw.vercel.app"),
+  metadataBase: new URL("https://catatdigw.gorillaworkout.id/"),
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://catatdigw.vercel.app",
+    url: "https://catatdigw.gorillaworkout.id/",
     siteName: "catatdiGW",
     title: "catadiGW",
     description: "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
