@@ -26,7 +26,7 @@ export default function HelpPage() {
         },
         {
           question: "Apakah catatdiGW gratis untuk digunakan?",
-          answer: "Ya, catatdiGW sepenuhnya gratis untuk digunakan. Kami menyediakan semua fitur pencatatan keuangan tanpa biaya berlangganan atau biaya tersembunyi.",
+          answer: "Ya, catatdiGW sepenuhnya gratis untuk digunakan selama 1 minggu",
         },
         {
           question: "Bagaimana cara mengunduh aplikasi mobile?",
@@ -90,46 +90,46 @@ export default function HelpPage() {
         },
       ],
     },
-    {
-      title: "Laporan dan Analisis",
-      icon: TrendingUp,
-      items: [
-        {
-          question: "Bagaimana cara melihat laporan keuangan?",
-          answer: "Masuk ke halaman 'Laporan', pilih periode yang diinginkan, dan Anda akan melihat ringkasan keuangan lengkap dengan grafik dan statistik.",
-        },
-        {
-          question: "Bisakah saya mengunduh laporan dalam format PDF?",
-          answer: "Ya, di halaman Laporan, klik tombol 'Unduh PDF' untuk mengunduh laporan keuangan dalam format PDF yang siap dicetak.",
-        },
-        {
-          question: "Bagaimana cara mengatur periode laporan?",
-          answer: "Di halaman Laporan, pilih tanggal mulai dan akhir menggunakan date picker, lalu pilih jenis laporan yang diinginkan.",
-        },
-        {
-          question: "Apa saja jenis laporan yang tersedia?",
-          answer: "Tersedia laporan pengeluaran, pemasukan, saldo rekening, dan analisis tren keuangan dengan berbagai periode waktu.",
-        },
-      ],
-    },
-    {
-      title: "Keamanan dan Privasi",
-      icon: HelpCircle,
-      items: [
-        {
-          question: "Apakah data keuangan saya aman?",
-          answer: "Ya, semua data keuangan Anda disimpan dengan aman menggunakan enkripsi dan hanya dapat diakses oleh Anda sendiri.",
-        },
-        {
-          question: "Bisakah saya menghapus akun saya?",
-          answer: "Ya, Anda dapat menghapus akun di halaman Pengaturan > Profil. Semua data akan dihapus secara permanen.",
-        },
-        {
-          question: "Apakah ada backup data otomatis?",
-          answer: "Data Anda tersimpan otomatis di cloud dan dapat diakses dari perangkat manapun yang terhubung dengan akun Google Anda.",
-        },
-      ],
-    },
+    // {
+    //   title: "Laporan dan Analisis",
+    //   icon: TrendingUp,
+    //   items: [
+    //     {
+    //       question: "Bagaimana cara melihat laporan keuangan?",
+    //       answer: "Masuk ke halaman 'Laporan', pilih periode yang diinginkan, dan Anda akan melihat ringkasan keuangan lengkap dengan grafik dan statistik.",
+    //     },
+    //     {
+    //       question: "Bisakah saya mengunduh laporan dalam format PDF?",
+    //       answer: "Ya, di halaman Laporan, klik tombol 'Unduh PDF' untuk mengunduh laporan keuangan dalam format PDF yang siap dicetak.",
+    //     },
+    //     {
+    //       question: "Bagaimana cara mengatur periode laporan?",
+    //       answer: "Di halaman Laporan, pilih tanggal mulai dan akhir menggunakan date picker, lalu pilih jenis laporan yang diinginkan.",
+    //     },
+    //     {
+    //       question: "Apa saja jenis laporan yang tersedia?",
+    //       answer: "Tersedia laporan pengeluaran, pemasukan, saldo rekening, dan analisis tren keuangan dengan berbagai periode waktu.",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Keamanan dan Privasi",
+    //   icon: HelpCircle,
+    //   items: [
+    //     {
+    //       question: "Apakah data keuangan saya aman?",
+    //       answer: "Ya, semua data keuangan Anda disimpan dengan aman menggunakan enkripsi dan hanya dapat diakses oleh Anda sendiri.",
+    //     },
+    //     {
+    //       question: "Bisakah saya menghapus akun saya?",
+    //       answer: "Ya, Anda dapat menghapus akun di halaman Pengaturan > Profil. Semua data akan dihapus secara permanen.",
+    //     },
+    //     {
+    //       question: "Apakah ada backup data otomatis?",
+    //       answer: "Data Anda tersimpan otomatis di cloud dan dapat diakses dari perangkat manapun yang terhubung dengan akun Google Anda.",
+    //     },
+    //   ],
+    // },
   ]
 
   const quickActions = [
@@ -162,7 +162,7 @@ export default function HelpPage() {
   const helpResources = [
     { icon: Book, title: "Panduan Lengkap", description: "Dokumentasi lengkap penggunaan aplikasi" },
     { icon: Video, title: "Video Tutorial", description: "Tutorial video step-by-step" },
-    { icon: MessageCircle, title: "Live Chat", description: "Chat langsung dengan tim support" },
+    // { icon: MessageCircle, title: "Live Chat", description: "Chat langsung dengan tim support" },
     { icon: Mail, title: "Email Support", description: "Kirim pertanyaan via email" },
   ]
 
@@ -259,7 +259,7 @@ export default function HelpPage() {
         </Card>
 
         {/* Contact Support */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Masih Butuh Bantuan?</CardTitle>
             <CardDescription>Tim support kami siap membantu Anda</CardDescription>
@@ -280,7 +280,7 @@ export default function HelpPage() {
               </SubscriptionGuardButton>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </DashboardLayout>
   )

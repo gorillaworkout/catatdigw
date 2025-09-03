@@ -3,7 +3,7 @@ export const config = {
   // WhatsApp contact information
   whatsapp: {
     number: "6281234567890", // Format: 6281234567890 (tanpa + atau spasi)
-    displayNumber: "+62 812-3456-7890", // Format yang ditampilkan ke user
+    displayNumber: "+62 851-3352-4900", // Format yang ditampilkan ke user
     businessHours: "Senin - Jumat, 09:00 - 17:00 WIB",
     responseTime: "1-2 jam",
   },

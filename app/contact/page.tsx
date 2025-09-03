@@ -33,7 +33,7 @@ export default function ContactPage() {
       icon: Phone,
       title: "WhatsApp",
       description: "Hubungi via WhatsApp untuk bantuan cepat",
-      contact: "+62 812-3456-7890",
+      contact: "+62 851-3352-4900",
       available: "08:00 - 17:00 WIB",
     },
   ]

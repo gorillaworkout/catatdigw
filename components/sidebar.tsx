@@ -52,10 +52,9 @@ export function Sidebar({ open, setOpen, collapsed = false, setCollapsed }: Side
     { name: "Subscription", href: "/dashboard/subscription", icon: Calendar },
     ...(isAdmin ? [{ name: "Admin", href: "/dashboard/admin", icon: Settings }] : []),
     { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
-    { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
-    // { name: "Bantuan", href: "/dashboard/help", icon: HelpCircle },
     { name: "Bantuan & FAQ", href: "/dashboard/help", icon: MessageSquare }, // Redirected to help page
-    { name: "Riwayat & Backup", href: "/dashboard/history", icon: History },
+    // { name: "Laporan Keuangan", href: "/dashboard/reports", icon: FileText },
+    // { name: "Riwayat & Backup", href: "/dashboard/history", icon: History },
   ]
 
   return (
