@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { PWAInstall } from "@/components/pwa-install"
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration"
 
 export const metadata: Metadata = {
   title: "catadiGW",
@@ -50,7 +51,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/catatdigw.png", sizes: "192x192", type: "image/png" },
-      { url: "/catatdigw.webp", sizes: "192x192", type: "image/webp" },
       { url: "/catatdigw.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
@@ -103,8 +103,8 @@ export default function RootLayout({
         {/* PWA Icons */}
         <link rel="apple-touch-icon" href="/catatdigw.png" />
         <link rel="apple-touch-icon" sizes="192x192" href="/catatdigw.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/catatdigw.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/catatdigw.png" />
-        <link rel="icon" type="image/webp" sizes="192x192" href="/catatdigw.webp" />
         <link rel="icon" type="image/png" sizes="512x512" href="/catatdigw.png" />
         <link rel="shortcut icon" href="/catatdigw.png" />
         <link rel="manifest" href="/manifest.json" />
@@ -123,6 +123,7 @@ html {
       </head>
       <body className="dark" suppressHydrationWarning>
         {children}
+        <ServiceWorkerRegistration />
         <PWAInstall />
       </body>
     </html>
