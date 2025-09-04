@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { PWAInstall } from "@/components/pwa-install"
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration"
+import { IOSInstallBanner } from "@/components/ios-install-banner"
 
 export const metadata: Metadata = {
   title: "catadiGW",
@@ -26,32 +27,35 @@ export const metadata: Metadata = {
     description: "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
     images: [
       {
-        url: "/catatdigw.png",
-        width: 192,
-        height: 192,
-        alt: "catatdiGW Logo",
+        url: "https://catatdigw.gorillaworkout.id/catatdigw.png",
+        width: 512,
+        height: 512,
+        alt: "catatdiGW - Aplikasi Pencatatan Keuangan",
         type: "image/png",
       },
       {
-        url: "/catatdigw.webp",
-        width: 192,
-        height: 192,
-        alt: "catatdiGW Logo",
+        url: "https://catatdigw.gorillaworkout.id/catatdigw.webp",
+        width: 512,
+        height: 512,
+        alt: "catatdiGW - Aplikasi Pencatatan Keuangan",
         type: "image/webp",
       },
     ],
   },
   twitter: {
-    card: "summary",
-    title: "catadiGW",
+    card: "summary_large_image",
+    title: "catatdiGW - Aplikasi Pencatatan Keuangan",
     description: "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
-    images: ["/catatdigw.png"],
+    images: ["https://catatdigw.gorillaworkout.id/catatdigw.png"],
     creator: "@catatdigw",
+    site: "@catatdigw",
   },
   icons: {
     icon: [
       { url: "/catatdigw.png", sizes: "192x192", type: "image/png" },
       { url: "/catatdigw.png", sizes: "512x512", type: "image/png" },
+      { url: "/catatdigw.webp", sizes: "192x192", type: "image/webp" },
+      { url: "/catatdigw.webp", sizes: "512x512", type: "image/webp" },
     ],
     apple: [
       { url: "/catatdigw.png", sizes: "192x192", type: "image/png" },
@@ -106,12 +110,42 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="512x512" href="/catatdigw.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/catatdigw.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/catatdigw.png" />
+        <link rel="icon" type="image/webp" sizes="192x192" href="/catatdigw.webp" />
+        <link rel="icon" type="image/webp" sizes="512x512" href="/catatdigw.webp" />
         <link rel="shortcut icon" href="/catatdigw.png" />
         <link rel="manifest" href="/manifest.json" />
         
         {/* Preload critical assets */}
         <link rel="preload" href="/catatdigw.png" as="image" />
         <link rel="preload" href="/catatdigw.webp" as="image" />
+        
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "catatdiGW",
+              "description": "Aplikasi pencatatan pengeluaran dan pemasukan uang yang elegan dan mudah digunakan",
+              "url": "https://catatdigw.gorillaworkout.id/",
+              "applicationCategory": "FinanceApplication",
+              "operatingSystem": "Web Browser",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "IDR"
+              },
+              "author": {
+                "@type": "Organization",
+                "name": "catatdiGW Team"
+              },
+              "image": "https://catatdigw.gorillaworkout.id/catatdigw.png",
+              "logo": "https://catatdigw.gorillaworkout.id/catatdigw.png",
+              "screenshot": "https://catatdigw.gorillaworkout.id/catatdigw.png"
+            })
+          }}
+        />
         
         <style>{`
 html {
@@ -122,6 +156,7 @@ html {
         `}</style>
       </head>
       <body className="dark" suppressHydrationWarning>
+        <IOSInstallBanner />
         {children}
         <ServiceWorkerRegistration />
         <PWAInstall />

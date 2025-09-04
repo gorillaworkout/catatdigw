@@ -26,7 +26,7 @@ export function PWAInstall() {
                       (window.navigator as any).standalone === true
     setIsStandalone(standalone)
 
-    // Handle beforeinstallprompt for Android
+    // Handle beforeinstallprompt for Android/Desktop Chrome
     const handler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
@@ -34,6 +34,11 @@ export function PWAInstall() {
     }
 
     window.addEventListener("beforeinstallprompt", handler)
+
+    // For iOS, always show install button if not standalone
+    if (iOS && !standalone) {
+      setShowInstall(true)
+    }
 
     return () => window.removeEventListener("beforeinstallprompt", handler)
   }, [])
@@ -53,7 +58,7 @@ export function PWAInstall() {
   // Don't show if already installed
   if (isStandalone) return null
 
-  // Show install button for Android
+  // Show install button for Android/Desktop Chrome
   if (deferredPrompt && !isIOS) {
     return (
       <Button
@@ -68,8 +73,8 @@ export function PWAInstall() {
     )
   }
 
-  // Show install instructions for iOS
-  if (isIOS && !isStandalone) {
+  // Show install instructions for iOS (Safari or Chrome)
+  if (isIOS && !isStandalone && showInstall) {
     return (
       <Dialog>
         <DialogTrigger asChild>
@@ -131,9 +136,15 @@ export function PWAInstall() {
             </div>
           </div>
           
-          <div className="bg-muted p-3 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <strong>Tips:</strong> Setelah diinstall, aplikasi akan muncul di home screen dan bisa dibuka seperti aplikasi native lainnya.
+          <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>💡 Tips:</strong> Cara ini bekerja di Safari dan Chrome di iPhone. Setelah diinstall, aplikasi akan muncul di home screen dan bisa dibuka seperti aplikasi native lainnya.
+            </p>
+          </div>
+          
+          <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>⚠️ Catatan:</strong> Chrome di iPhone tidak mendukung install prompt otomatis seperti di Android. Gunakan cara manual di atas untuk menginstall PWA.
             </p>
           </div>
         </DialogContent>

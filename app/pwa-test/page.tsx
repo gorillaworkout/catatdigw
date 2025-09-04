@@ -183,10 +183,17 @@ export default function PWATestPage() {
                 Install Instructions for iOS
               </CardTitle>
               <CardDescription>
-                Cara menginstall aplikasi di iPhone/iPad
+                Cara menginstall aplikasi di iPhone/iPad (Safari & Chrome)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>⚠️ Penting:</strong> Chrome di iPhone tidak mendukung install prompt otomatis seperti di Android. 
+                  Anda harus menggunakan cara manual di bawah ini untuk menginstall PWA.
+                </p>
+              </div>
+              
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
                   1
@@ -194,7 +201,7 @@ export default function PWATestPage() {
                 <div>
                   <p className="font-medium">Tap tombol Share</p>
                   <p className="text-sm text-muted-foreground">
-                    Di bagian bawah layar Safari, tap tombol <Share className="w-4 h-4 inline mx-1" /> Share
+                    Di bagian bawah layar (Safari atau Chrome), tap tombol <Share className="w-4 h-4 inline mx-1" /> Share
                   </p>
                 </div>
               </div>
@@ -221,6 +228,13 @@ export default function PWATestPage() {
                     Konfirmasi dengan tap "Add" di pojok kanan atas
                   </p>
                 </div>
+              </div>
+              
+              <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>💡 Tips:</strong> Cara ini bekerja di Safari dan Chrome di iPhone. 
+                  Setelah diinstall, aplikasi akan muncul di home screen dan bisa dibuka seperti aplikasi native lainnya.
+                </p>
               </div>
             </CardContent>
           </Card>
