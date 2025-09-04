@@ -66,7 +66,7 @@ export function Header() {
               </div>
             ) : (
               <Button onClick={signInWithGoogle} className="bg-primary hover:bg-primary/90">
-                Masuk dengan Google
+                login
               </Button>
             )}
 
