@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { Menu, X } from "lucide-react";
-import Image from "next/image"
+import Image from "next/image";
+import { FirebaseErrorDialog } from "@/components/firebase-error-dialog";
 
 export function Header() {
   const { user, loading, signInWithGoogle, logout, error } = useAuth()
@@ -48,9 +49,7 @@ export function Header() {
           {/* Auth Button */}
           <div className="flex items-center space-x-4">
             {error ? (
-              <div className="text-sm text-red-500 px-3 py-1 bg-red-50 rounded-md">
-                Firebase Error
-              </div>
+              <FirebaseErrorDialog error={error} onRetry={signInWithGoogle} />
             ) : loading ? (
               <div className="w-24 h-9 bg-muted animate-pulse rounded-md" />
             ) : user ? (

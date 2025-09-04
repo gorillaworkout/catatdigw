@@ -65,16 +65,30 @@ export function useAuth() {
 
   const signInWithGoogle = async () => {
     if (!auth || !googleProvider) {
-      setError("Firebase authentication is not available")
+      setError("Firebase authentication is not available. Please check your environment variables.")
       return
     }
 
     try {
       setError(null)
       await signInWithPopup(auth, googleProvider)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing in with Google:", error)
-      setError("Failed to sign in with Google")
+      
+      // Handle specific Firebase errors
+      if (error.code === 'auth/popup-closed-by-user') {
+        setError("Login dibatalkan oleh pengguna")
+      } else if (error.code === 'auth/popup-blocked') {
+        setError("Popup login diblokir. Silakan izinkan popup untuk domain ini.")
+      } else if (error.code === 'auth/network-request-failed') {
+        setError("Koneksi jaringan gagal. Periksa koneksi internet Anda.")
+      } else if (error.code === 'auth/too-many-requests') {
+        setError("Terlalu banyak percobaan login. Silakan coba lagi nanti.")
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setError("Google Sign-In tidak diaktifkan. Hubungi administrator.")
+      } else {
+        setError(`Gagal login: ${error.message || 'Terjadi kesalahan yang tidak diketahui'}`)
+      }
     }
   }
 

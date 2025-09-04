@@ -105,7 +105,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="192x192" href="/catatdigw.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/catatdigw.png" />
         <link rel="icon" type="image/webp" sizes="192x192" href="/catatdigw.webp" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/catatdigw.png" />
         <link rel="shortcut icon" href="/catatdigw.png" />
         <link rel="manifest" href="/manifest.json" />
         

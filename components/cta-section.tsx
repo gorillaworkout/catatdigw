@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/use-auth"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { AnimatedDiv } from "@/components/animated-div"
+import { FirebaseErrorDialog } from "@/components/firebase-error-dialog"
 
 export function CTASection() {
-  const { user, signInWithGoogle } = useAuth()
+  const { user, signInWithGoogle, error } = useAuth()
 
   return (
     <section className="py-20 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10">
@@ -42,6 +43,8 @@ export function CTASection() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
+              ) : error ? (
+                <FirebaseErrorDialog error={error} onRetry={signInWithGoogle} />
               ) : (
                 <Button
                   size="lg"
