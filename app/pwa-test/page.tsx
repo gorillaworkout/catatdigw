@@ -26,6 +26,9 @@ export default function PWATestPage() {
   })
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return
+
     // Check PWA requirements
     const checks = {
       manifest: !!document.querySelector('link[rel="manifest"]'),
@@ -233,18 +236,31 @@ export default function PWATestPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              <p><strong>URL:</strong> {window.location.href}</p>
-              <p><strong>Protocol:</strong> {window.location.protocol}</p>
-              <p><strong>Hostname:</strong> {window.location.hostname}</p>
-              <p><strong>Service Worker Support:</strong> {'serviceWorker' in navigator ? 'Yes' : 'No'}</p>
-              <p><strong>Display Mode:</strong> {window.matchMedia("(display-mode: standalone)").matches ? 'Standalone' : 'Browser'}</p>
-              <p><strong>Before Install Prompt:</strong> {'beforeinstallprompt' in window ? 'Available' : 'Not Available'}</p>
+              {typeof window !== 'undefined' ? (
+                <>
+                  <p><strong>URL:</strong> {window.location.href}</p>
+                  <p><strong>Protocol:</strong> {window.location.protocol}</p>
+                  <p><strong>Hostname:</strong> {window.location.hostname}</p>
+                  <p><strong>Service Worker Support:</strong> {'serviceWorker' in navigator ? 'Yes' : 'No'}</p>
+                  <p><strong>Display Mode:</strong> {window.matchMedia("(display-mode: standalone)").matches ? 'Standalone' : 'Browser'}</p>
+                  <p><strong>Before Install Prompt:</strong> {'beforeinstallprompt' in window ? 'Available' : 'Not Available'}</p>
+                </>
+              ) : (
+                <p className="text-muted-foreground">Loading debug information...</p>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <div className="text-center">
-          <Button onClick={() => window.location.href = '/'} variant="outline">
+          <Button 
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '/'
+              }
+            }} 
+            variant="outline"
+          >
             Back to Home
           </Button>
         </div>
