@@ -6,6 +6,7 @@ import "./globals.css"
 import { PWAInstall } from "@/components/pwa-install"
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration"
 import { IOSInstallBanner } from "@/components/ios-install-banner"
+import { NetworkStatus } from "@/components/network-status"  // ← TAMBAHKAN INI
 
 export const metadata: Metadata = {
   title: "catadiGW",
@@ -156,6 +157,7 @@ html {
         `}</style>
       </head>
       <body className="dark" suppressHydrationWarning>
+        <NetworkStatus /> 
         <IOSInstallBanner />
         {children}
         <ServiceWorkerRegistration />
